@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>MeowGPT — your most useless AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6ec;
+    --bg-2: #f7ead6;
+    --ink: #2a1a0f;
+    --ink-soft: #6b4f3a;
+    --accent: #e85d3a;
+    --accent-2: #f4a259;
+    --cream: #fff8ec;
+    --shadow: 0 2px 0 #2a1a0f;
+    --shadow-lg: 0 6px 0 #2a1a0f;
+    --border: 2px solid #2a1a0f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    font-family: 'Fraunces', Georgia, serif;
+    background: var(--bg);
+    color: var(--ink);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(244, 162, 89, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(232, 93, 58, 0.1) 0%, transparent 40%);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.05 0 0 0 0 0 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    padding: 14px 20px;
+    border-bottom: var(--border);
+    background: var(--cream);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border: var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .logo-mark svg { width: 22px; height: 22px; }
+
+  .logo-text { font-style: italic; }
+  .logo-text .gpt { font-style: normal; background: var(--ink); color: var(--cream); padding: 1px 6px; border-radius: 4px; font-size: 16px; vertical-align: 2px; }
+
+  .counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: var(--bg-2);
+    padding: 4px 10px;
+    border: var(--border);
+    border-radius: 999px;
+  }
+
+  /* ===== CHAT AREA ===== */
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px 20px;
+    position: relative;
+    z-index: 2;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .messages {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .welcome {
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+
+  .welcome h1 {
+    font-size: clamp(36px, 7vw, 56px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 12px;
+  }
+
+  .welcome h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .welcome p {
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 380px;
+    margin: 0 auto;
+    font-style: italic;
+  }
+
+  .welcome-cat {
+    font-size: 80px;
+    display: inline-block;
+    margin-bottom: 16px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-8px) rotate(3deg); }
+  }
+
+  .suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 24px;
+  }
+
+  .suggestion {
+    background: var(--cream);
+    border: var(--border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .suggestion:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .suggestion:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-user { justify-content: flex-end; }
+
+  .bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border: var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    font-size: 16px;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  .msg-user .bubble {
+    background: var(--accent);
+    color: var(--cream);
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg-bot .bubble {
+    background: var(--cream);
+    border-bottom-left-radius: 4px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: var(--border);
+    background: var(--accent-2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    align-self: flex-end;
+  }
+
+  .avatar svg { width: 22px; height: 22px; }
+
+  /* Typing indicator */
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 4px 0;
+  }
+
+  .typing span {
+    width: 8px;
+    height: 8px;
+    background: var(--ink-soft);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+  }
+
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* ===== INPUT AREA ===== */
+  .input-area {
+    padding: 14px 20px 20px;
+    background: var(--cream);
+    border-top: var(--border);
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+  }
+
+  .input-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .input-box {
+    flex: 1;
+    background: var(--bg);
+    border: var(--border);
+    border-radius: 24px;
+    padding: 4px 6px 4px 18px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    box-shadow: var(--shadow);
+    min-height: 48px;
+  }
+
+  textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    resize: none;
+    padding: 11px 0;
+    line-height: 1.4;
+    max-height: 120px;
+    min-height: 24px;
+  }
+
+  textarea::placeholder { color: var(--ink-soft); font-style: italic; }
+
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border: var(--border);
+    border-radius: 50%;
+    background: var(--cream);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.1s, box-shadow 0.1s, background 0.15s;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .icon-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .icon-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  .send-btn { background: var(--accent); }
+  .send-btn svg { color: var(--cream); }
+
+  .mic-btn { background: var(--accent-2); margin-bottom: 4px; }
+
+  .disclaimer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+    font-style: italic;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ===== VOICE MODE OVERLAY ===== */
+  .voice-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 50% 30%, rgba(232, 93, 58, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 50% 70%, rgba(244, 162, 89, 0.15) 0%, transparent 50%);
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .voice-overlay.active { display: flex; }
+
+  .blob-container {
+    width: min(280px, 70vw);
+    height: min(280px, 70vw);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .blob {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 30% 30%, var(--accent-2), var(--accent));
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    box-shadow: 0 10px 0 var(--ink), 0 10px 40px rgba(232, 93, 58, 0.4);
+    position: relative;
+    animation: blobMorph 3s ease-in-out infinite, blobBreathe 2s ease-in-out infinite;
+  }
+
+  @keyframes blobMorph {
+    0%, 100% { border-radius: 50% 50% 50% 50%; }
+    25% { border-radius: 60% 40% 55% 45%; }
+    50% { border-radius: 45% 55% 40% 60%; }
+    75% { border-radius: 55% 45% 60% 40%; }
+  }
+
+  @keyframes blobBreathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* Cat face on blob */
+  .blob-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8%;
+    pointer-events: none;
+  }
+
+  .blob-eyes {
+    display: flex;
+    gap: 22%;
+    width: 60%;
+    justify-content: center;
+  }
+
+  .blob-eye {
+    width: 18px;
+    height: 24px;
+    background: var(--ink);
+    border-radius: 50%;
+    animation: blink 4s infinite;
+  }
+
+  @keyframes blink {
+    0%, 95%, 100% { transform: scaleY(1); }
+    97% { transform: scaleY(0.1); }
+  }
+
+  .blob-mouth {
+    width: 14px;
+    height: 10px;
+    border: 3px solid var(--ink);
+    border-top: none;
+    border-radius: 0 0 14px 14px;
+    background: transparent;
+  }
+
+  /* Sound waves around blob */
+  .wave {
+    position: absolute;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: wave 2s infinite ease-out;
+  }
+
+  .wave:nth-child(1) { animation-delay: 0s; }
+  .wave:nth-child(2) { animation-delay: 0.5s; }
+  .wave:nth-child(3) { animation-delay: 1s; }
+
+  @keyframes wave {
+    0% {
+      width: 100%;
+      height: 100%;
+      opacity: 0.6;
+    }
+    100% {
+      width: 160%;
+      height: 160%;
+      opacity: 0;
+    }
+  }
+
+  .voice-status {
+    margin-top: 50px;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--ink-soft);
+    min-height: 30px;
+    text-align: center;
+  }
+
+  .voice-status strong {
+    color: var(--ink);
+    font-style: normal;
+  }
+
+  /* Fake waveform */
+  .waveform {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    height: 40px;
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .waveform.active { opacity: 1; }
+
+  .wave-bar {
+    width: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: waveform 0.8s infinite ease-in-out;
+  }
+
+  @keyframes waveform {
+    0%, 100% { height: 8px; }
+    50% { height: 32px; }
+  }
+
+  .voice-close {
+    margin-top: 40px;
+    background: var(--ink);
+    color: var(--cream);
+    border: var(--border);
+    border-radius: 999px;
+    padding: 14px 32px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .voice-close:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .voice-close:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--ink);
+  }
+
+  /* ===== RESET TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--cream);
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-style: italic;
+    font-size: 14px;
+    z-index: 50;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 480px) {
+    header { padding: 12px 16px; }
+    .logo { font-size: 18px; }
+    .logo-mark { width: 32px; height: 32px; }
+    main { padding: 16px 12px; }
+    .input-area { padding: 12px 12px 16px; }
+    .welcome { padding: 20px 16px; }
+    .welcome-cat { font-size: 64px; }
+    .bubble { font-size: 15px; max-width: 80%; }
+  }
+
+  @media (min-width: 768px) {
+    .welcome { padding: 60px 20px 30px; }
+  }
+
+  /* Hide scrollbar but keep functionality */
+  main::-webkit-scrollbar { width: 6px; }
+  main::-webkit-scrollbar-track { background: transparent; }
+  main::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 3px; opacity: 0.3; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #fff8ec;">
+        <path d="M12 5c-1.5-2-4-3-6-3 1 2 1 4 1 6"/>
+        <path d="M12 5c1.5-2 4-3 6-3-1 2-1 4-1 6"/>
+        <circle cx="12" cy="13" r="7"/>
+        <circle cx="9.5" cy="12" r="0.8" fill="currentColor"/>
+        <circle cx="14.5" cy="12" r="0.8" fill="currentColor"/>
+        <path d="M10 15.5c.5.5 1.3.5 2 0"/>
+      </svg>
+    </div>
+    <span class="logo-text">Meow<span class="gpt">GPT</span></span>
+  </div>
+  <div class="counter" id="counter">0 / 50</div>
+</header>
+
+<main id="chat">
+  <div class="messages" id="messages">
+    <div class="welcome" id="welcome">
+      <div class="welcome-cat">🐱</div>
+      <h1>Ask me <em>anything.</em></h1>
+      <p>I will respond exclusively in meows. This is my one talent and I'm very proud of it.</p>
+      <div class="suggestions">
+        <button class="suggestion" data-q="What's the meaning of life?">What's the meaning of life?</button>
+        <button class="suggestion" data-q="How do I get rich?">How do I get rich?</button>
+        <button class="suggestion" data-q="Are you sentient?">Are you sentient?</button>
+        <button class="suggestion" data-q="Tell me a secret">Tell me a secret</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="input-area">
+  <div class="input-wrap">
+    <div class="input-box">
+      <textarea id="input" placeholder="Ask MeowGPT anything..." rows="1"></textarea>
+      <button class="icon-btn send-btn" id="send" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+    <button class="icon-btn mic-btn" id="mic" aria-label="Voice mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="3" width="6" height="12" rx="3"/>
+        <path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>
+      </svg>
+    </button>
+  </div>
+  <p class="disclaimer">MeowGPT can make mistakes. Verify all meows independently.</p>
+</div>
+
+<!-- Voice Mode Overlay -->
+<div class="voice-overlay" id="voice-overlay">
+  <div class="blob-container">
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="blob">
+      <div class="blob-face">
+        <div class="blob-eyes">
+          <div class="blob-eye"></div>
+          <div class="blob-eye"></div>
+        </div>
+        <div class="blob-mouth"></div>
+      </div>
+    </div>
+  </div>
+  <div class="voice-status" id="voice-status">Listening<span class="dots"></span></div>
+  <div class="waveform" id="waveform">
+    <div class="wave-bar" style="animation-delay: 0s"></div>
+    <div class="wave-bar" style="animation-delay: 0.1s"></div>
+    <div class="wave-bar" style="animation-delay: 0.2s"></div>
+    <div class="wave-bar" style="animation-delay: 0.15s"></div>
+    <div class="wave-bar" style="animation-delay: 0.3s"></div>
+    <div class="wave-bar" style="animation-delay: 0.05s"></div>
+    <div class="wave-bar" style="animation-delay: 0.25s"></div>
+    <div class="wave-bar" style="animation-delay: 0.4s"></div>
+    <div class="wave-bar" style="animation-delay: 0.1s"></div>
+    <div class="wave-bar" style="animation-delay: 0.35s"></div>
+  </div>
+  <button class="voice-close" id="voice-close">Tap to stop</button>
+</div>
+
+<!-- Reset toast -->
+<div class="toast" id="toast">Conversation reset — that's a lot of meows 🐾</div>
+
+<script>
+  const MEOW_VARIANTS = [
+    "meow",
+    "meow meow",
+    "mrrrow",
+    "purrr",
+    "mew",
+    "MEOW",
+    "meow?",
+    "meow!",
+    "mrow mrow",
+    "*purrs*",
+    "meeeow",
+    "nya",
+    "mraow",
+    "prrrp",
+    "meow meow meow",
+    "*tail flick* meow",
+    "...meow",
+    "MEOWWW",
+    "mrrp?",
+    "purr purr"
+  ];
+
+  // Generate meow audio using Web Audio API (so no external file needed)
+  let audioCtx = null;
+  function playMeow() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioCtx;
+      const duration = 0.4 + Math.random() * 0.3;
+      const now = ctx.currentTime;
+
+      // Two oscillators for richer "meow" timbre
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      osc1.type = 'sawtooth';
+      osc2.type = 'sine';
+      filter.type = 'lowpass';
+      filter.Q.value = 8;
+
+      // Pitch sweep: "meee-oww"
+      const startFreq = 600 + Math.random() * 200;
+      const peakFreq = startFreq * 1.4;
+      const endFreq = startFreq * 0.7;
+
+      osc1.frequency.setValueAtTime(startFreq, now);
+      osc1.frequency.linearRampToValueAtTime(peakFreq, now + duration * 0.3);
+      osc1.frequency.linearRampToValueAtTime(endFreq, now + duration);
+
+      osc2.frequency.setValueAtTime(startFreq * 2, now);
+      osc2.frequency.linearRampToValueAtTime(peakFreq * 2, now + duration * 0.3);
+      osc2.frequency.linearRampToValueAtTime(endFreq * 2, now + duration);
+
+      filter.frequency.setValueAtTime(800, now);
+      filter.frequency.linearRampToValueAtTime(2000, now + duration * 0.3);
+      filter.frequency.linearRampToValueAtTime(600, now + duration);
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + 0.05);
+      gain.gain.setValueAtTime(0.15, now + duration * 0.7);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + duration);
+      osc2.stop(now + duration);
+    } catch (e) {
+      console.log('audio unavailable');
+    }
+  }
+
+  const messagesEl = document.getElementById('messages');
+  const welcomeEl = document.getElementById('welcome');
+  const inputEl = document.getElementById('input');
+  const sendBtn = document.getElementById('send');
+  const micBtn = document.getElementById('mic');
+  const counterEl = document.getElementById('counter');
+  const voiceOverlay = document.getElementById('voice-overlay');
+  const voiceStatus = document.getElementById('voice-status');
+  const voiceClose = document.getElementById('voice-close');
+  const waveform = document.getElementById('waveform');
+  const toast = document.getElementById('toast');
+
+  const MAX_MESSAGES = 50;
+  let messageCount = 0;
+  let voiceTimeout = null;
+  let voiceStage = 'idle';
+
+  function getRandomMeow() {
+    return MEOW_VARIANTS[Math.floor(Math.random() * MEOW_VARIANTS.length)];
+  }
+
+  function updateCounter() {
+    counterEl.textContent = `${messageCount} / ${MAX_MESSAGES}`;
+    if (messageCount >= MAX_MESSAGES * 0.8) {
+      counterEl.style.background = 'var(--accent)';
+      counterEl.style.color = 'var(--cream)';
+    } else {
+      counterEl.style.background = 'var(--bg-2)';
+      counterEl.style.color = 'var(--ink-soft)';
+    }
+  }
+
+  function showToast(text) {
+    toast.textContent = text;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  function resetChat() {
+    messagesEl.innerHTML = '';
+    messagesEl.appendChild(welcomeEl);
+    welcomeEl.style.display = 'block';
+    messageCount = 0;
+    updateCounter();
+    showToast("Conversation reset — that's a lot of meows 🐾");
+  }
+
+  function addMessage(text, isUser) {
+    if (welcomeEl.style.display !== 'none') {
+      welcomeEl.style.display = 'none';
+    }
+
+    const msg = document.createElement('div');
+    msg.className = 'msg ' + (isUser ? 'msg-user' : 'msg-bot');
+
+    if (!isUser) {
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#2a1a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 6c-1.2-1.5-3-2.2-4.5-2 .5 1.5.5 3 .5 4.5"/>
+        <path d="M12 6c1.2-1.5 3-2.2 4.5-2-.5 1.5-.5 3-.5 4.5"/>
+        <circle cx="12" cy="13" r="6"/>
+        <circle cx="10" cy="12.5" r="0.7" fill="#2a1a0f"/>
+        <circle cx="14" cy="12.5" r="0.7" fill="#2a1a0f"/>
+        <path d="M10.5 15.5c.4.4 1.1.4 1.5 0M12 15.5c.4.4 1.1.4 1.5 0"/>
+        <path d="M12 14v1"/>
+      </svg>`;
+      msg.appendChild(avatar);
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    msg.appendChild(bubble);
+
+    messagesEl.appendChild(msg);
+    scrollToBottom();
+  }
+
+  function addTyping() {
+    const msg = document.createElement('div');
+    msg.className = 'msg msg-bot';
+    msg.id = 'typing-msg';
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#2a1a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 6c-1.2-1.5-3-2.2-4.5-2 .5 1.5.5 3 .5 4.5"/>
+      <path d="M12 6c1.2-1.5 3-2.2 4.5-2-.5 1.5-.5 3-.5 4.5"/>
+      <circle cx="12" cy="13" r="6"/>
+      <circle cx="10" cy="12.5" r="0.7" fill="#2a1a0f"/>
+      <circle cx="14" cy="12.5" r="0.7" fill="#2a1a0f"/>
+      <path d="M10.5 15.5c.4.4 1.1.4 1.5 0M12 15.5c.4.4 1.1.4 1.5 0"/>
+    </svg>`;
+    msg.appendChild(avatar);
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    msg.appendChild(bubble);
+
+    messagesEl.appendChild(msg);
+    scrollToBottom();
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing-msg');
+    if (t) t.remove();
+  }
+
+  function scrollToBottom() {
+    const main = document.getElementById('chat');
+    setTimeout(() => {
+      main.scrollTop = main.scrollHeight;
+    }, 50);
+  }
+
+  function sendMessage(text) {
+    text = text.trim();
+    if (!text) return;
+    if (messageCount >= MAX_MESSAGES) {
+      resetChat();
+      return;
+    }
+
+    addMessage(text, true);
+    messageCount++;
+    updateCounter();
+
+    inputEl.value = '';
+    autoGrow();
+
+    // Fake thinking delay
+    const delay = 600 + Math.random() * 900;
+    setTimeout(() => {
+      addTyping();
+      const replyDelay = 700 + Math.random() * 600;
+      setTimeout(() => {
+        removeTyping();
+        addMessage(getRandomMeow(), false);
+        messageCount++;
+        updateCounter();
+
+        if (messageCount >= MAX_MESSAGES) {
+          setTimeout(() => {
+            addMessage("(...okay that's enough meows. resetting...)", false);
+            setTimeout(resetChat, 1800);
+          }, 800);
+        }
+      }, replyDelay);
+    }, delay);
+  }
+
+  function autoGrow() {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+  }
+
+  inputEl.addEventListener('input', autoGrow);
+  inputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(inputEl.value);
+    }
+  });
+
+  sendBtn.addEventListener('click', () => sendMessage(inputEl.value));
+
+  document.querySelectorAll('.suggestion').forEach(btn => {
+    btn.addEventListener('click', () => {
+      sendMessage(btn.dataset.q);
+    });
+  });
+
+  // ===== VOICE MODE =====
+  function startVoiceMode() {
+    voiceOverlay.classList.add('active');
+    voiceStage = 'listening';
+    voiceStatus.innerHTML = '<em>Listening...</em>';
+    waveform.classList.add('active');
+
+    // Random listening duration: 2.5 - 5s
+    const listenDuration = 2500 + Math.random() * 2500;
+
+    voiceTimeout = setTimeout(() => {
+      // Transcribing stage
+      voiceStage = 'transcribing';
+      voiceStatus.innerHTML = '<em>Thinking...</em>';
+      waveform.classList.remove('active');
+
+      voiceTimeout = setTimeout(() => {
+        // Reply
+        voiceStage = 'replying';
+        voiceStatus.innerHTML = '<strong>"meow"</strong>';
+        playMeow();
+
+        voiceTimeout = setTimeout(() => {
+          // Add to chat and exit
+          if (messageCount < MAX_MESSAGES - 1) {
+            addMessage("🎤 (voice message)", true);
+            addMessage(getRandomMeow(), false);
+            messageCount += 2;
+            updateCounter();
+          }
+          stopVoiceMode();
+        }, 800);
+      }, 700 + Math.random() * 400);
+    }, listenDuration);
+  }
+
+  function stopVoiceMode() {
+    if (voiceTimeout) {
+      clearTimeout(voiceTimeout);
+      voiceTimeout = null;
+    }
+    voiceOverlay.classList.remove('active');
+    waveform.classList.remove('active');
+    voiceStage = 'idle';
+    voiceStatus.innerHTML = '<em>Listening...</em>';
+  }
+
+  micBtn.addEventListener('click', startVoiceMode);
+  voiceClose.addEventListener('click', () => {
+    // If user taps stop while "listening", skip ahead to reply
+    if (voiceStage === 'listening') {
+      clearTimeout(voiceTimeout);
+      voiceStage = 'transcribing';
+      voiceStatus.innerHTML = '<em>Thinking...</em>';
+      waveform.classList.remove('active');
+      voiceTimeout = setTimeout(() => {
+        voiceStage = 'replying';
+        voiceStatus.innerHTML = '<strong>"meow"</strong>';
+        playMeow();
+        voiceTimeout = setTimeout(() => {
+          if (messageCount < MAX_MESSAGES - 1) {
+            addMessage("🎤 (voice message)", true);
+            addMessage(getRandomMeow(), false);
+            messageCount += 2;
+            updateCounter();
+          }
+          stopVoiceMode();
+        }, 800);
+      }, 500);
+    } else {
+      stopVoiceMode();
+    }
+  });
+
+  // Initialize
+  updateCounter();
+</script>
+
+</body>
+</html>
