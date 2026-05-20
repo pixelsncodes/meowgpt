@@ -741,79 +741,42 @@
     scheduleIdleSwap();
   }
 
-  // Audio — Web Audio API for iOS Safari compatibility
-  const MEOW_URLS = [
-    'sounds/meow-1.mp3',
-    'sounds/meow-2.mp3',
-    'sounds/meow-3.mp3',
-    'sounds/meow-4.mp3'
-  ];
+  // Audio — synthesized Web Audio meow (works reliably across all browsers)
   let audioCtx = null;
-  let meowBuffers = [];
-  let lastMeowIndex = -1;
-  let audioReady = false;
-
-  async function initAudio() {
-    if (audioCtx) return;
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AC();
-
-      // Resume context (iOS Safari quirk — must happen in user gesture)
-      if (audioCtx.state === 'suspended') {
-        await audioCtx.resume();
-      }
-
-      // Play a silent buffer to fully unlock iOS Safari
-      const silentBuffer = audioCtx.createBuffer(1, 1, 22050);
-      const src = audioCtx.createBufferSource();
-      src.buffer = silentBuffer;
-      src.connect(audioCtx.destination);
-      src.start(0);
-
-      // Fetch and decode all meow files
-      meowBuffers = await Promise.all(MEOW_URLS.map(async (url) => {
-        const res = await fetch(url);
-        const arrayBuf = await res.arrayBuffer();
-        return await audioCtx.decodeAudioData(arrayBuf);
-      }));
-      audioReady = true;
-    } catch (e) {
-      console.log('audio init failed:', e);
-    }
-  }
-
-  // Init audio on the very first user interaction
-  function firstInteraction() {
-    initAudio();
-  }
-  ['touchstart', 'touchend', 'click', 'keydown'].forEach(ev => {
-    document.addEventListener(ev, firstInteraction, { once: true, passive: true });
-  });
-
   function playMeow() {
-    if (!audioReady || !audioCtx || meowBuffers.length === 0) return;
     try {
-      // Resume context if needed (some browsers suspend after inactivity)
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      let idx;
-      do {
-        idx = Math.floor(Math.random() * meowBuffers.length);
-      } while (idx === lastMeowIndex && meowBuffers.length > 1);
-      lastMeowIndex = idx;
-
-      const src = audioCtx.createBufferSource();
-      src.buffer = meowBuffers[idx];
-      const gain = audioCtx.createGain();
-      gain.gain.value = 0.8;
-      src.connect(gain);
-      gain.connect(audioCtx.destination);
-      src.start(0);
-    } catch (e) {
-      console.log('meow play failed:', e);
-    }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = audioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const duration = 0.4 + Math.random() * 0.3;
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+      osc1.type = 'sawtooth'; osc2.type = 'sine';
+      filter.type = 'lowpass'; filter.Q.value = 8;
+      const startFreq = 600 + Math.random() * 200;
+      const peakFreq = startFreq * 1.4;
+      const endFreq = startFreq * 0.7;
+      osc1.frequency.setValueAtTime(startFreq, now);
+      osc1.frequency.linearRampToValueAtTime(peakFreq, now + duration * 0.3);
+      osc1.frequency.linearRampToValueAtTime(endFreq, now + duration);
+      osc2.frequency.setValueAtTime(startFreq * 2, now);
+      osc2.frequency.linearRampToValueAtTime(peakFreq * 2, now + duration * 0.3);
+      osc2.frequency.linearRampToValueAtTime(endFreq * 2, now + duration);
+      filter.frequency.setValueAtTime(800, now);
+      filter.frequency.linearRampToValueAtTime(2000, now + duration * 0.3);
+      filter.frequency.linearRampToValueAtTime(600, now + duration);
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.15, now + 0.05);
+      gain.gain.setValueAtTime(0.15, now + duration * 0.7);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+      osc1.connect(filter); osc2.connect(filter);
+      filter.connect(gain); gain.connect(ctx.destination);
+      osc1.start(now); osc2.start(now);
+      osc1.stop(now + duration); osc2.stop(now + duration);
+    } catch (e) { console.log('audio unavailable'); }
   }
 
   const messagesEl = document.getElementById('messages');
