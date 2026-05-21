@@ -699,8 +699,15 @@
   const CAT_NEUTRAL = "assets/meow-cat-neutral.png";
   const CAT_BOO = "assets/meow-cat-boo.gif";
   const CAT_CUTE = "assets/meow-cat-cute.gif";
+  const CAT_HI = "assets/meow-cat-hi.gif";
   const CAT_TYPING = "assets/meow-cat-typing.gif";
-  const IDLE_POOL = [CAT_NEUTRAL, CAT_BOO, CAT_CUTE];
+  // Weighted idle pool — neutral/boo/cute appear ~3x more often than hi
+  const IDLE_POOL = [
+    CAT_NEUTRAL, CAT_NEUTRAL, CAT_NEUTRAL,
+    CAT_BOO, CAT_BOO, CAT_BOO,
+    CAT_CUTE, CAT_CUTE, CAT_CUTE,
+    CAT_HI
+  ];
 
   const catImg = document.getElementById('cat-img');
   let idleTimer = null;
@@ -985,9 +992,11 @@
     }
   });
 
-  // Init
+  // Init — Mochi waves hi on first load
   updateCounter();
-  setCatIdle();
+  catImg.src = CAT_HI;
+  currentCat = CAT_HI;
+  scheduleIdleSwap();
 </script>
 
 </body>
