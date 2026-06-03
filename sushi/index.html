@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <!-- ===================================================================
      MeowSushi — a cute cat-sushi-cafe game
      Single self-contained file. Vanilla HTML/CSS/JS only.
@@ -12,14 +13,10 @@
   <div class="ms-game" id="ms-game">
     <div class="ms-inner">
 
-      <!-- ---------- TOP BAR ---------- -->
-      <header class="ms-topbar">
-        <span class="ms-score-label">Score</span>
-        <span class="ms-score-value" id="ms-score">0</span>
-      </header>
-
       <!-- ---------- CUSTOMER AREA (recipe card + cat) ---------- -->
       <section class="ms-customer">
+        <div class="ms-score-coin"><span class="ms-score-value" id="ms-score">0</span></div>
+
         <!-- LEFT: recipe / order card -->
         <div class="ms-recipe" id="ms-recipe">
           <div class="ms-recipe-art" id="ms-recipe-art">🍣</div>
@@ -35,23 +32,30 @@
         </div>
       </section>
 
-      <!-- ---------- PREP AREA (slots get built by JS) ---------- -->
-      <section class="ms-prep" id="ms-prep"></section>
+      <!-- ---------- BOTTOM WORKSPACE ---------- -->
+      <div class="ms-workspace">
 
-      <!-- ---------- INGREDIENT GRID 3x2 (built by JS) ---------- -->
-      <section class="ms-grid" id="ms-grid"></section>
+        <!-- ---------- PREP AREA (slots get built by JS) ---------- -->
+        <section class="ms-prep" id="ms-prep"></section>
 
-      <!-- ---------- BOTTOM BUTTONS ---------- -->
-      <footer class="ms-actions">
-        <button class="ms-btn ms-btn-clear" id="ms-clear" type="button">Clear</button>
-        <button class="ms-btn ms-btn-serve" id="ms-serve" type="button">Serve</button>
-      </footer>
+        <!-- ---------- INGREDIENT GRID 3x2 (built by JS) ---------- -->
+        <section class="ms-grid" id="ms-grid"></section>
+
+        <!-- ---------- BOTTOM BUTTONS ---------- -->
+        <footer class="ms-actions">
+          <button class="ms-btn ms-btn-clear" id="ms-clear" type="button">clear</button>
+          <button class="ms-btn ms-btn-serve" id="ms-serve" type="button">serve</button>
+        </footer>
+
+      </div>
 
     </div>
   </div>
 </div>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+
 /* =====================================================================
    THEME TOKENS  — tweak the whole look from here
    ===================================================================== */
@@ -76,7 +80,7 @@
   --ink:#4a0a0a;            /* warm dark text                     */
 
   /* Geometry */
-  --r-box:6cqmin;           /* outer box radius                   */
+  --r-box:4cqmin;           /* outer box radius                   */
   --r-comp:4.5cqmin;        /* compartment radius                 */
   --gap:2cqmin;             /* base gap between sections          */
 
@@ -87,9 +91,10 @@
   width:100%;
   padding:2vmin;
   box-sizing:border-box;
-  font-family:"Baloo 2","Comic Sans MS","Hiragino Maru Gothic Pro",
-              "Segoe UI",system-ui,sans-serif;
+  background:#3E0A0A;
+  font-family:"Fredoka", system-ui, sans-serif;
   -webkit-tap-highlight-color:transparent;
+  text-transform:lowercase;
 }
 .ms-stage *{ box-sizing:border-box; margin:0; padding:0; }
 
@@ -98,17 +103,13 @@
    height so it always stays a visible 1:1 square with no scrolling.
    --------------------------------------------------------------------- */
 .ms-game{
-  width:min(100%, 92vh);
-  aspect-ratio:1 / 1;
+  width:min(100%, calc(92vh * 9 / 16));
+  aspect-ratio:9 / 16;
   container-type:size;           /* enables cqmin units inside */
   border-radius:var(--r-box);
-  background:
-    radial-gradient(120% 90% at 50% 0%, var(--red-glow) 0%, var(--lacquer) 42%, #7e0000 100%);
+  background:var(--lacquer);
   border:1.4cqmin solid var(--outline);
-  box-shadow:
-    0 3cqmin 6cqmin rgba(90,9,9,.35),                /* drop shadow      */
-    inset 0 1.2cqmin 2cqmin rgba(255,180,160,.45),   /* glossy top sheen */
-    inset 0 -2cqmin 3cqmin rgba(60,0,0,.45);         /* bottom depth     */
+  box-shadow:0 2cqmin 5cqmin rgba(90,9,9,.35);
   overflow:hidden;               /* hard guarantee: nothing escapes */
   position:relative;
 }
@@ -124,10 +125,24 @@
 .ms-inner{
   position:relative;
   width:100%; height:100%;
-  padding:3cqmin;
+  padding:0;
   display:flex;
   flex-direction:column;
-  gap:var(--gap);
+  gap:0;
+}
+
+/* =====================================================================
+   BOTTOM WORKSPACE  (flat bento panel behind prep / grid / buttons)
+   ===================================================================== */
+.ms-workspace{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:2cqmin;
+  padding:2cqmin;
+  background:#C23B2D;
+  border-radius:0;
 }
 
 /* Reusable "concave molded compartment" look (top section = convex/cushion) */
@@ -140,75 +155,65 @@
 }
 
 /* =====================================================================
-   TOP BAR
+   SCORE COIN
    ===================================================================== */
-.ms-topbar{
-  flex:0 0 auto;
-  height:10cqmin;
+.ms-score-coin{
+  position:absolute;
+  top:3cqmin; right:3cqmin;
+  width:14cqmin; height:14cqmin;
+  border-radius:50%;
+  background:#FFD23F;
+  border:.7cqmin solid var(--outline);
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:2cqmin;
-  border-radius:var(--r-comp);
-  background:linear-gradient(180deg,#3a0606,#1c0202);
-  border:.7cqmin solid var(--outline);
-  box-shadow:
-    inset 0 1cqmin 1.5cqmin rgba(255,120,100,.25),
-    inset 0 -1cqmin 1.5cqmin rgba(0,0,0,.5);
-  color:#ffe9d6;
-}
-.ms-score-label{
-  font-size:4.4cqmin;
-  font-weight:800;
-  letter-spacing:.4cqmin;
-  text-transform:uppercase;
-  opacity:.85;
+  z-index:3;
 }
 .ms-score-value{
-  font-size:6.4cqmin;
+  font-size:6cqmin;
   font-weight:900;
-  color:#ffd23f;
-  text-shadow:0 .4cqmin 0 #8a5b00, 0 0 2cqmin rgba(255,210,63,.6);
-  min-width:8cqmin;
-  text-align:center;
+  color:var(--ink);
+  text-shadow:none;
   transition:transform .18s ease;
 }
 .ms-score-value.ms-pop{ transform:scale(1.35); }
 
 /* =====================================================================
-   CUSTOMER AREA
+   CUSTOMER AREA  (scene)
    ===================================================================== */
 .ms-customer{
-  flex:1 1 auto;
-  min-height:0;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:var(--gap);
+  flex:0 0 auto;
+  width:100%;
+  aspect-ratio:1 / 1;
+  position:relative;
+  overflow:hidden;
+  background:#FBE3D4;
+  border-radius:0;
+  border:none;
+  box-shadow:none;
 }
 
 /* ---- Recipe / order card ---- */
 .ms-recipe{
-  border-radius:var(--r-comp);
+  position:absolute;
+  top:6cqmin; left:5cqmin;
+  width:44cqmin;
+  z-index:2;
   padding:2cqmin;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:1cqmin;
-  /* lighter center (convex toy-card feel) */
-  background:radial-gradient(120% 120% at 50% 30%, #fffdf7 0%, #ffe9cf 70%, #ffd9b0 100%);
-  border:.8cqmin solid var(--outline);
-  box-shadow:
-    inset 0 1.4cqmin 2cqmin rgba(255,255,255,.9),
-    inset 0 -1.6cqmin 2.4cqmin rgba(150,70,40,.22),
-    0 1cqmin 2cqmin rgba(90,9,9,.18);
+  gap:0.3cqmin;
+  background:#ffffff;
+  border:.7cqmin solid var(--outline);
+  border-radius:5cqmin;
 }
 .ms-recipe-art{
   font-size:13cqmin;
   line-height:1;
-  filter:drop-shadow(0 1cqmin 1cqmin rgba(0,0,0,.18));
 }
-.ms-recipe-art img{ width:16cqmin; height:16cqmin; object-fit:contain; }
+.ms-recipe-art img{ width:22cqmin; height:22cqmin; object-fit:contain; }
 .ms-recipe-name{
   font-size:4.2cqmin;
   font-weight:900;
@@ -229,22 +234,23 @@
 }
 .ms-recipe-needs img{ width:5.2cqmin; height:5.2cqmin; object-fit:contain; }
 
-/* ---- Cat compartment (cat peeks in from the bottom) ---- */
+/* ---- Cat (peeks bottom-right of scene) ---- */
 .ms-cat{
-  position:relative;
-  border-radius:var(--r-comp);
-  overflow:hidden;
-  background:radial-gradient(120% 120% at 50% 25%, #ffd6c2 0%, #ff9f86 60%, #f06a4c 100%);
-  border:.8cqmin solid var(--outline);
-  box-shadow:
-    inset 0 1.4cqmin 2cqmin rgba(255,255,255,.6),
-    inset 0 -1.6cqmin 2.4cqmin rgba(120,30,10,.35);
+  position:absolute;
+  right:1cqmin; bottom:0;
+  width:46cqmin; height:52cqmin;
+  background:none;
+  border:none;
+  box-shadow:none;
+  border-radius:0;
+  overflow:visible;
   display:flex;
   align-items:flex-end;
   justify-content:center;
+  z-index:1;
 }
 .ms-cat-face{
-  font-size:26cqmin;
+  font-size:40cqmin;
   line-height:1;
   /* pushed down so only the top "half body" peeks in */
   transform:translateY(14%);
@@ -261,6 +267,7 @@
   animation:ms-wave 1.1s ease-in-out infinite;
 }
 .ms-cat-bubble{
+  display:none;
   position:absolute;
   top:3cqmin; left:50%;
   transform:translateX(-50%);
@@ -309,23 +316,19 @@
 }
 .ms-slot{
   position:relative;
-  border-radius:3.5cqmin;       /* ~15px feel at default size */
+  border-radius:3.5cqmin;
   display:flex;
   align-items:center;
   justify-content:center;
-  /* concave / inset molded compartment */
-  background:linear-gradient(180deg,#8e1414 0%,#c23030 60%,#d94040 100%);
-  border:.6cqmin solid var(--outline);
-  box-shadow:
-    inset 0 1.6cqmin 2cqmin rgba(0,0,0,.45),
-    inset 0 -1cqmin 1.4cqmin rgba(255,160,140,.35);
+  background:#A22C22;
+  border:.6cqmin solid #7E1C14;
+  box-shadow:inset 0 1.4cqmin 0 rgba(90,9,9,0.35), inset 0 -1cqmin 0 rgba(255,160,140,0.12);
 }
 .ms-slot .ms-slot-emoji{
   font-size:8cqmin; line-height:1;
-  filter:drop-shadow(0 .5cqmin .5cqmin rgba(0,0,0,.25));
   animation:ms-plop .25s ease;
 }
-.ms-slot .ms-slot-emoji img{ width:9cqmin; height:9cqmin; object-fit:contain; }
+.ms-slot .ms-slot-emoji img{ width:12cqmin; height:12cqmin; object-fit:contain; }
 .ms-slot.is-empty{ opacity:.5; }
 .ms-slot.is-empty::after{
   content:"";
@@ -340,7 +343,7 @@
   width:5.2cqmin; height:5.2cqmin;
   border-radius:50%;
   border:.5cqmin solid var(--outline);
-  background:linear-gradient(180deg,#fff,#ffd9d2);
+  background:#ffffff;
   color:var(--outline);
   font-size:3.4cqmin;
   font-weight:900;
@@ -356,8 +359,8 @@
    INGREDIENT GRID  (3 cols x 2 rows)
    ===================================================================== */
 .ms-grid{
-  flex:0 0 auto;
-  height:25cqmin;
+  flex:1 1 auto;
+  min-height:0;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   grid-template-rows:repeat(2,1fr);
@@ -374,19 +377,14 @@
   color:#fff7f0;
   font-weight:800;
   font-size:3.3cqmin;
-  /* concave: slightly darker top -> lighter lower portion (reversed from top section) */
-  background:linear-gradient(180deg,#9a1818 0%,#c93030 55%,#e05246 100%);
-  border:.7cqmin solid var(--outline);
-  box-shadow:
-    inset 0 1.6cqmin 2cqmin rgba(0,0,0,.4),
-    inset 0 -1.2cqmin 1.6cqmin rgba(255,170,150,.4),
-    0 .8cqmin 1.4cqmin rgba(90,9,9,.25);
+  background:#A22C22;
+  border:.7cqmin solid #7E1C14;
+  box-shadow:inset 0 1.4cqmin 0 rgba(90,9,9,0.35), inset 0 -1cqmin 0 rgba(255,160,140,0.12);
   transition:transform .1s ease, filter .15s ease;
   user-select:none;
 }
-.ms-ing-emoji{ font-size:6cqmin; line-height:1;
-  filter:drop-shadow(0 .5cqmin .5cqmin rgba(0,0,0,.3)); }
-.ms-ing-emoji img{ width:7cqmin; height:7cqmin; object-fit:contain; }
+.ms-ing-emoji{ font-size:6cqmin; line-height:1; }
+.ms-ing-emoji img{ width:24cqmin; height:24cqmin; object-fit:contain; }
 .ms-ing:hover{ filter:brightness(1.08); }
 .ms-ing:active{ transform:scale(.93); }
 /* already-used ingredient */
@@ -409,39 +407,31 @@
   flex:0 0 auto;
   height:11cqmin;
   display:grid;
-  grid-template-columns:1fr 1.3fr;   /* Serve a touch wider */
+  grid-template-columns:1fr 1fr;
   gap:2cqmin;
 }
 .ms-btn{
   border:none;
-  border-radius:6cqmin;              /* pill */
+  border-radius:4cqmin;
   font-size:4.6cqmin;
   font-weight:900;
   letter-spacing:.3cqmin;
   cursor:pointer;
   color:#fff;
   transition:transform .1s ease, filter .15s ease;
-  text-shadow:0 .4cqmin .6cqmin rgba(0,0,0,.22);
+  text-shadow:none;
 }
 .ms-btn:active{ transform:translateY(.8cqmin) scale(.98); }
 .ms-btn:hover{ filter:brightness(1.06); }
 .ms-btn-clear{
-  background:linear-gradient(180deg,var(--coral),var(--coral-deep));
-  box-shadow:
-    inset 0 1.2cqmin 1cqmin rgba(255,255,255,.55),
-    inset 0 -1.4cqmin 1.6cqmin rgba(150,40,20,.4),
-    0 1.4cqmin 2cqmin rgba(90,9,9,.3);
-  border:.6cqmin solid #b73b2b;
+  background:#EFA088;
+  border:.6cqmin solid #D98668;
+  color:#3A1610;
 }
 .ms-btn-serve{
-  background:linear-gradient(180deg,var(--mint),var(--mint-deep));
-  box-shadow:
-    inset 0 1.2cqmin 1cqmin rgba(255,255,255,.6),
-    inset 0 -1.4cqmin 1.6cqmin rgba(20,90,55,.4),
-    0 1.4cqmin 2cqmin rgba(20,80,50,.3);
-  border:.6cqmin solid #3aa873;
-  color:#0c3d27;
-  text-shadow:0 .4cqmin .6cqmin rgba(255,255,255,.4);
+  background:#95D29C;
+  border:.6cqmin solid #5FB079;
+  color:#16432A;
 }
 
 /* When the whole game reacts to a serve */
@@ -473,16 +463,30 @@
       sad:     ""
     },
     recipeCards: {     // keyed by recipe id
-      salmon_sashimi: "", tuna_sashimi: "",
-      salmon_nigiri: "",  tuna_nigiri: "",
-      salmon_roll: "",    tuna_avocado_roll: "",
-      veggie_roll: "",    rainbow_roll: ""
+      salmon_sashimi:    "assets/sushi_salmon_sashimi.png",
+      tuna_sashimi:      "assets/sushi_tuna_sashimi.png",
+      salmon_nigiri:     "assets/sushi_salmon_nigiri.png",
+      tuna_nigiri:       "assets/sushi_tuna_nigiri.png",
+      salmon_roll:       "assets/sushi_salmon_roll.png",
+      tuna_avocado_roll: "assets/sushi_tuna_avocado_roll.png",
+      veggie_roll:       "assets/sushi_veggie_roll.png",
+      rainbow_roll:      "assets/sushi_rainbow_roll.png"
     },
     ingredients: {     // keyed by ingredient id (grid buttons)
-      salmon: "", tuna: "", rice: "", nori: "", avocado: "", cucumber: ""
+      salmon:   "assets/ing_salmon.png",
+      tuna:     "assets/ing_tuna.png",
+      rice:     "assets/ing_rice.png",
+      nori:     "assets/ing_nori.png",
+      avocado:  "assets/ing_avocado.png",
+      cucumber: "assets/ing_cucumber.png"
     },
     preparedIngredients: { // keyed by ingredient id (shown in prep slots)
-      salmon: "", tuna: "", rice: "", nori: "", avocado: "", cucumber: ""
+      salmon:   "assets/ing_salmon.png",
+      tuna:     "assets/ing_tuna.png",
+      rice:     "assets/ing_rice.png",
+      nori:     "assets/ing_nori.png",
+      avocado:  "assets/ing_avocado.png",
+      cucumber: "assets/ing_cucumber.png"
     }
   };
 
@@ -609,7 +613,6 @@
     el.grid.innerHTML = INGREDIENTS.map(ing =>
       `<button class="ms-ing" data-add="${ing.id}" type="button">
          <span class="ms-ing-emoji">${visual(ASSETS.ingredients[ing.id], ing.emoji, ing.name)}</span>
-         <span class="ms-ing-name">${ing.name}</span>
        </button>`
     ).join("");
   }
