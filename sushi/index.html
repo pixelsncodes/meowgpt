@@ -184,7 +184,7 @@ html, body {
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:3;
+  z-index:4;
 }
 .ms-score-value{
   font-size:6cqmin;
@@ -214,16 +214,20 @@ html, body {
   position:absolute;
   top:6cqmin; left:5cqmin;
   width:44cqmin;
-  z-index:2;
+  z-index:3;
   padding:2cqmin;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:0;
-  background:#ffffff;
-  border:.7cqmin solid var(--outline);
-  border-radius:5cqmin;
+  background:rgba(255, 255, 255, 0.15);
+  border:1px solid rgba(255, 255, 255, 1);
+  border-radius:16px;
+  box-shadow:0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter:blur(6.1px);
+  -webkit-backdrop-filter:blur(6.1px);
+  isolation:isolate;
 }
 .ms-recipe::before,
 .ms-recipe::after{
@@ -232,18 +236,28 @@ html, body {
   pointer-events:none;
 }
 .ms-recipe::before{
-  right:-5.8cqmin;
-  bottom:8cqmin;
-  border-style:solid;
-  border-width:3.8cqmin 0 3.8cqmin 6.2cqmin;
-  border-color:transparent transparent transparent var(--outline);
+  right:-2.1cqmin;
+  bottom:8.9cqmin;
+  width:5cqmin;
+  height:5cqmin;
+  background:rgba(255, 255, 255, 0.15);
+  border-top:1px solid rgba(255, 255, 255, 1);
+  border-right:1px solid rgba(255, 255, 255, 1);
+  border-radius:0 8px 0 0;
+  transform:rotate(45deg);
+  z-index:-1;
+  box-shadow:4px -4px 18px rgba(0, 0, 0, 0.06);
+  backdrop-filter:blur(6.1px);
+  -webkit-backdrop-filter:blur(6.1px);
 }
 .ms-recipe::after{
-  right:-4.4cqmin;
-  bottom:8.7cqmin;
-  border-style:solid;
-  border-width:3.1cqmin 0 3.1cqmin 5cqmin;
-  border-color:transparent transparent transparent #ffffff;
+  right:-1px;
+  bottom:8.2cqmin;
+  width:2px;
+  height:6.6cqmin;
+  background:rgba(255, 255, 255, 0.15);
+  backdrop-filter:blur(6.1px);
+  -webkit-backdrop-filter:blur(6.1px);
 }
 .ms-recipe-art{
   font-size:26cqmin;
@@ -284,7 +298,7 @@ html, body {
   display:flex;
   align-items:flex-end;
   justify-content:center;
-  z-index:1;
+  z-index:2;
 }
 .ms-cat-face{
   font-size:40cqmin;
@@ -297,10 +311,12 @@ html, body {
 }
 .ms-cat-face img{ width:68cqmin; height:auto; transform:translateY(8%); }
 .ms-cat-bubble{
-  display:none;
+  display:block;
   position:absolute;
-  top:3cqmin; left:50%;
-  transform:translateX(-50%);
+  top:28cqmin; left:50%;
+  z-index:2;
+  transform:translateX(-50%) scale(0);
+  opacity:0;
   background:#fff;
   color:var(--ink);
   font-weight:800;
@@ -310,7 +326,7 @@ html, body {
   border:.5cqmin solid var(--outline);
   box-shadow:0 .6cqmin 1cqmin rgba(0,0,0,.2);
   white-space:nowrap;
-  transition:opacity .2s ease, transform .2s ease;
+  pointer-events:none;
 }
 /* reaction animations */
 .ms-cat.is-happy .ms-cat-face{ animation:ms-happy .5s ease; }
@@ -523,6 +539,46 @@ html, body {
   border-radius:2cqmin;
   transition:width .25s ease;
 }
+
+/* Cat slide in/out */
+@keyframes ms-cat-enter{
+  from{ transform:translateX(110cqmin); }
+  to  { transform:translateX(0); }
+}
+@keyframes ms-cat-leave{
+  from{ transform:translateX(0); }
+  to  { transform:translateX(110cqmin); }
+}
+.ms-cat.is-hidden  { transform:translateX(110cqmin); }
+.ms-cat.is-entering{ animation:ms-cat-enter .45s cubic-bezier(.25,.46,.45,.94) forwards; }
+.ms-cat.is-leaving { animation:ms-cat-leave .4s  cubic-bezier(.55,.055,.675,.19) forwards; }
+
+/* Cat bubble pop in/out */
+@keyframes ms-bubble-in{
+  from{ transform:translateX(-50%) scale(0); opacity:0; }
+  65% { transform:translateX(-50%) scale(1.12); opacity:1; }
+  to  { transform:translateX(-50%) scale(1); opacity:1; }
+}
+@keyframes ms-bubble-out{
+  from{ transform:translateX(-50%) scale(1); opacity:1; }
+  to  { transform:translateX(-50%) scale(0); opacity:0; }
+}
+.ms-cat-bubble.is-showing{ opacity:1; animation:ms-bubble-in  .25s ease forwards; }
+.ms-cat-bubble.is-hiding { animation:ms-bubble-out .2s  ease forwards; }
+
+/* Recipe card pop in/out */
+@keyframes ms-recipe-in{
+  from{ transform:scale(.55); opacity:0; }
+  70% { transform:scale(1.06); opacity:1; }
+  to  { transform:scale(1);    opacity:1; }
+}
+@keyframes ms-recipe-out{
+  from{ transform:scale(1);   opacity:1; }
+  to  { transform:scale(.55); opacity:0; }
+}
+.ms-recipe.is-hidden { opacity:0; pointer-events:none; transform:scale(.55); }
+.ms-recipe.is-showing{ animation:ms-recipe-in  .3s ease forwards; }
+.ms-recipe.is-hiding { animation:ms-recipe-out .2s ease forwards; }
 </style>
 
 <script>
@@ -606,10 +662,10 @@ html, body {
     NEXT_ROUND_MS:  1500
   };
 
-  const REACTIONS = {
-    happy: ["Purrfect!", "Nyaa~ ♥", "So yummy!", "Best chef!"],
-    sad:   ["Hmm...", "Not quite", "Mrrp?", "Oh no..."],
-    neutral: ["Meow!", "Order up~", "Please?", "Nyaa!"]
+  const CAT_SOUNDS = {
+    neutral: ["Meow~", "Mrrp!", "Purr...", "Nyaa!", "Mrow?", "Prrrr~"],
+    happy:   ["Purrrr! ♥", "Nyaa~ ♥", "Mrrp! ♥", "Meow! ♥", "Purrfect! ♥"],
+    sad:     ["Mrrp...", "Meow...", "Nyaaa...", "Mrow...", "Prrr..."]
   };
 
   /* ===================================================================
@@ -628,6 +684,7 @@ html, body {
   const el = {
     game:       document.getElementById("ms-game"),
     score:      document.getElementById("ms-score"),
+    recipe:     document.getElementById("ms-recipe"),
     recipeArt:  document.getElementById("ms-recipe-art"),
     recipeName: document.getElementById("ms-recipe-name"),
     recipeNeeds:document.getElementById("ms-recipe-needs"),
@@ -708,7 +765,43 @@ html, body {
     el.cat.classList.remove("is-happy", "is-sad");
     if (stateName === "happy") el.cat.classList.add("is-happy");
     if (stateName === "sad")   el.cat.classList.add("is-sad");
-    el.catBubble.textContent = rand(REACTIONS[stateName]);
+  }
+
+  /* ===================================================================
+     ANIMATION HELPERS
+     =================================================================== */
+  function showBubble(type) {
+    el.catBubble.textContent = rand(CAT_SOUNDS[type]);
+    el.catBubble.classList.remove("is-hiding");
+    el.catBubble.classList.add("is-showing");
+  }
+
+  function hideBubble(callback) {
+    el.catBubble.classList.remove("is-showing");
+    el.catBubble.classList.add("is-hiding");
+    setTimeout(() => {
+      el.catBubble.classList.remove("is-hiding");
+      if (callback) callback();
+    }, 200);
+  }
+
+  function showRecipe(callback) {
+    el.recipe.classList.remove("is-hidden", "is-hiding");
+    el.recipe.classList.add("is-showing");
+    setTimeout(() => {
+      el.recipe.classList.remove("is-showing");
+      if (callback) callback();
+    }, 300);
+  }
+
+  function hideRecipe(callback) {
+    el.recipe.classList.remove("is-showing");
+    el.recipe.classList.add("is-hiding");
+    setTimeout(() => {
+      el.recipe.classList.remove("is-hiding");
+      el.recipe.classList.add("is-hidden");
+      if (callback) callback();
+    }, 200);
   }
 
   /* ===================================================================
@@ -747,16 +840,37 @@ html, body {
     state.score += gained;
     renderScore();
 
-    // pop the score + react
+    // Score coin pop
     el.score.classList.add("ms-pop");
     setTimeout(() => el.score.classList.remove("ms-pop"), 200);
 
-    setCat(correct ? "happy" : "sad");
+    // Screen flash
     el.game.classList.add(correct ? "is-correct" : "is-wrong");
     setTimeout(() => el.game.classList.remove("is-correct", "is-wrong"), 450);
 
-    // next round
-    setTimeout(nextRound, CONFIG.NEXT_ROUND_MS);
+    // 1. Hide order card
+    hideRecipe(() => {
+
+      // 2. Cat reacts with bubble
+      const mood = correct ? "happy" : "sad";
+      setCat(mood);
+      showBubble(mood);
+
+      // 3. After 2s, hide bubble and slide cat out
+      setTimeout(() => {
+        hideBubble(() => {
+          el.cat.classList.remove("is-entering");
+          el.cat.classList.add("is-leaving");
+
+          // 4. After slide-out, call nextRound (it handles the 500ms pause)
+          setTimeout(() => {
+            el.cat.classList.remove("is-leaving");
+            el.cat.classList.add("is-hidden");
+            nextRound();
+          }, 400);
+        });
+      }, 2000);
+    });
   }
 
   function nextRound() {
@@ -767,12 +881,37 @@ html, body {
     }
     state.order  = next;
     state.prep   = [];
-    state.locked = false;
+    state.locked = true;   // stays locked throughout the intro sequence
 
-    setCat("neutral");
-    renderOrder();
     renderPrep();
     refreshGridState();
+    renderOrder();         // update recipe content while card is still hidden
+
+    // Reset cat to off-screen
+    el.cat.classList.remove("is-entering", "is-leaving");
+    el.cat.classList.add("is-hidden");
+
+    // 500ms pause, then slide cat in
+    setTimeout(() => {
+      setCat("neutral");
+      el.cat.classList.remove("is-hidden");
+      el.cat.classList.add("is-entering");
+
+      // Slide-in completes -> greeting bubble
+      setTimeout(() => {
+        el.cat.classList.remove("is-entering");
+        showBubble("neutral");
+
+        // Hold bubble 800ms -> hide -> reveal recipe card -> unlock
+        setTimeout(() => {
+          hideBubble(() => {
+            showRecipe(() => {
+              state.locked = false;
+            });
+          });
+        }, 800);
+      }, 450);
+    }, 500);
   }
 
   /* ===================================================================
@@ -797,7 +936,9 @@ html, body {
   function init() {
     buildGrid();
     renderScore();
-    nextRound();    // sets first order + neutral cat
+    el.cat.classList.add("is-hidden");
+    el.recipe.classList.add("is-hidden");
+    nextRound();
   }
 
   function preloadAssets(onComplete) {
