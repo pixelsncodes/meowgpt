@@ -20,6 +20,45 @@
         </div>
       </div>
     </div>
+
+    <div class="ms-screen ms-screen-home" id="ms-home-screen">
+      <div class="ms-screen-panel">
+        <button class="ms-screen-btn ms-play-btn" id="ms-play" type="button"><span aria-hidden="true"></span>play</button>
+      </div>
+    </div>
+
+    <div class="ms-screen ms-screen-level" id="ms-level-screen">
+      <div class="ms-screen-panel">
+        <div class="ms-screen-kicker" id="ms-level-kicker">level 1</div>
+        <h2 id="ms-level-title">next city</h2>
+        <p id="ms-level-copy">5 orders are waiting.</p>
+        <button class="ms-screen-btn" id="ms-level-start" type="button">start shift</button>
+      </div>
+    </div>
+
+    <div class="ms-screen ms-screen-summary" id="ms-summary-screen">
+      <div class="ms-summary-panel">
+        <div class="ms-screen-kicker" id="ms-summary-kicker">level complete</div>
+        <h2 id="ms-summary-title">shift summary</h2>
+        <div class="ms-summary-stats">
+          <div><span id="ms-summary-earned">0</span><small>coins</small></div>
+          <div><span id="ms-summary-correct">0</span><small>served</small></div>
+          <div><span id="ms-summary-wrong">0</span><small>wrong</small></div>
+        </div>
+        <div class="ms-summary-orders" id="ms-summary-orders"></div>
+        <button class="ms-screen-btn" id="ms-summary-next" type="button">continue</button>
+      </div>
+    </div>
+
+    <div class="ms-screen ms-screen-complete" id="ms-complete-screen">
+      <div class="ms-screen-panel">
+        <div class="ms-screen-kicker">game complete</div>
+        <h2>all city stops cleared</h2>
+        <p id="ms-complete-copy">the sushi route is wrapped and the cats are full.</p>
+        <button class="ms-screen-btn" id="ms-replay" type="button">play again</button>
+      </div>
+    </div>
+
     <div class="ms-inner">
 
       <!-- ---------- CUSTOMER AREA (recipe card + cat) ---------- -->
@@ -149,6 +188,200 @@ html, body {
 }
 
 /* =====================================================================
+   SPLASH / LEVEL SCREENS
+   ===================================================================== */
+.ms-screen{
+  position:absolute;
+  inset:0;
+  z-index:30;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:5cqmin;
+  background:
+    linear-gradient(180deg, rgba(62,10,10,.3), rgba(62,10,10,.78)),
+    radial-gradient(120% 90% at 50% 20%, #ffdf76 0%, #c23b2d 48%, #5a0909 100%);
+  opacity:0;
+  pointer-events:none;
+  transform:scale(1.04);
+  transition:opacity .32s ease, transform .32s ease;
+}
+.ms-screen.is-active{
+  opacity:1;
+  pointer-events:auto;
+  transform:scale(1);
+}
+.ms-screen-home{
+  background:
+    url("/sushi/assets/bg-home.jpg") center / cover no-repeat,
+    radial-gradient(120% 90% at 50% 20%, #ffdf76 0%, #c23b2d 48%, #5a0909 100%);
+}
+.ms-screen-home .ms-screen-panel{
+  position:absolute;
+  top:72cqmin;
+  width:auto;
+  padding:0;
+  border:none;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
+.ms-play-btn{
+  min-width:36cqmin;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:2.4cqmin;
+  border:.55cqmin solid #7a1414;
+  border-radius:4cqmin;
+  background:
+    radial-gradient(80% 120% at 28% 0%, rgba(255,255,255,.82), rgba(255,255,255,0) 28%),
+    linear-gradient(180deg, #ffe071 0%, #ffc64a 55%, #f6a61f 100%);
+  color:#4a0a0a;
+  font-size:5.2cqmin;
+  padding:2.1cqmin 5cqmin;
+  box-shadow:
+    inset 0 .45cqmin 0 rgba(255,255,255,.58),
+    inset 0 -.55cqmin 0 rgba(154,75,0,.18),
+    0 .9cqmin 0 #6d0707,
+    0 1.5cqmin 2cqmin rgba(62,10,10,.28);
+}
+.ms-play-btn span{
+  width:0;
+  height:0;
+  border-top:2.3cqmin solid transparent;
+  border-bottom:2.3cqmin solid transparent;
+  border-left:3.4cqmin solid #7a2a00;
+}
+.ms-screen-level{
+  background:
+    linear-gradient(180deg, rgba(62,10,10,.22), rgba(62,10,10,.82)),
+    var(--ms-level-bg, url("/sushi/assets/bg-level-01.jpg")) center / cover no-repeat,
+    #dff7ff;
+}
+.ms-screen-panel,
+.ms-summary-panel{
+  width:min(74cqmin, 100%);
+  border:.7cqmin solid var(--outline);
+  border-radius:3cqmin;
+  background:rgba(255,243,230,.92);
+  box-shadow:0 2cqmin 5cqmin rgba(62,10,10,.36);
+  color:var(--ink);
+  text-align:center;
+  padding:4cqmin;
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+.ms-screen-panel h1,
+.ms-screen-panel h2,
+.ms-summary-panel h2{
+  font-size:7cqmin;
+  line-height:.95;
+  font-weight:900;
+  margin:.8cqmin 0 1.6cqmin;
+}
+.ms-logo{
+  letter-spacing:0;
+}
+.ms-logo-meow{
+  color:#fff3e6;
+  font-weight:800;
+}
+.ms-logo-sushi{
+  color:#ffd23f;
+  font-weight:900;
+}
+.ms-screen-panel p{
+  font-size:3.3cqmin;
+  line-height:1.15;
+  font-weight:700;
+  max-width:54cqmin;
+  margin:0 auto 3cqmin;
+}
+.ms-screen-kicker{
+  color:#a70000;
+  font-size:3.2cqmin;
+  font-weight:900;
+}
+.ms-screen-btn{
+  min-width:30cqmin;
+  border:.7cqmin solid var(--outline);
+  border-radius:3cqmin;
+  background:linear-gradient(180deg, #ffdf76, #ffc43d);
+  color:var(--ink);
+  font:900 4.4cqmin/1 "Fredoka", system-ui, sans-serif;
+  text-transform:lowercase;
+  padding:2.4cqmin 4cqmin;
+  box-shadow:0 1cqmin 0 var(--outline), 0 1.6cqmin 2.4cqmin rgba(90,9,9,.22);
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.ms-screen-btn:active{ transform:translateY(.7cqmin); box-shadow:0 .3cqmin 0 var(--outline); }
+@media (hover:hover){ .ms-screen-btn:hover{ filter:brightness(1.04); } }
+.ms-summary-panel{
+  width:min(82cqmin, 100%);
+  max-height:92%;
+  overflow:auto;
+}
+.ms-summary-stats{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:1.4cqmin;
+  margin:2.5cqmin 0;
+}
+.ms-summary-stats div,
+.ms-summary-order{
+  background:#fff8ef;
+  border:.45cqmin solid rgba(90,9,9,.24);
+  border-radius:2cqmin;
+}
+.ms-summary-stats div{
+  padding:1.6cqmin 1cqmin;
+}
+.ms-summary-stats span{
+  display:block;
+  font-size:5cqmin;
+  font-weight:900;
+  line-height:1;
+}
+.ms-summary-stats small{
+  display:block;
+  font-size:2.3cqmin;
+  font-weight:800;
+}
+.ms-summary-orders{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:1.2cqmin;
+  margin-bottom:3cqmin;
+}
+.ms-summary-order{
+  min-height:14cqmin;
+  display:grid;
+  grid-template-columns:10cqmin 1fr auto;
+  align-items:center;
+  gap:.8cqmin;
+  padding:1cqmin;
+  text-align:left;
+}
+.ms-summary-order img{
+  width:10cqmin;
+  height:10cqmin;
+  object-fit:contain;
+}
+.ms-summary-order-name{
+  font-size:2.7cqmin;
+  font-weight:900;
+  line-height:1;
+}
+.ms-summary-order-count{
+  font-size:3.2cqmin;
+  font-weight:900;
+  color:#a70000;
+}
+
+/* =====================================================================
    BOTTOM WORKSPACE  (flat bento panel behind prep / grid / buttons)
    ===================================================================== */
 .ms-workspace{
@@ -204,7 +437,7 @@ html, body {
   aspect-ratio:6 / 5;
   position:relative;
   overflow:hidden;
-  background:#dff7ff url("/sushi/assets/bg-level-01.jpg") center / cover no-repeat;
+  background:#dff7ff var(--ms-level-bg, url("/sushi/assets/bg-level-01.jpg")) center / cover no-repeat;
   border-radius:0;
   border:none;
   box-shadow:none;
@@ -229,36 +462,6 @@ html, body {
   -webkit-backdrop-filter:blur(6.1px);
   isolation:isolate;
 }
-.ms-recipe::before,
-.ms-recipe::after{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-}
-.ms-recipe::before{
-  right:-2.1cqmin;
-  bottom:8.9cqmin;
-  width:5cqmin;
-  height:5cqmin;
-  background:rgba(255, 255, 255, 0.15);
-  border-top:1px solid rgba(255, 255, 255, 1);
-  border-right:1px solid rgba(255, 255, 255, 1);
-  border-radius:0 8px 0 0;
-  transform:rotate(45deg);
-  z-index:-1;
-  box-shadow:4px -4px 18px rgba(0, 0, 0, 0.06);
-  backdrop-filter:blur(6.1px);
-  -webkit-backdrop-filter:blur(6.1px);
-}
-.ms-recipe::after{
-  right:-1px;
-  bottom:8.2cqmin;
-  width:2px;
-  height:6.6cqmin;
-  background:rgba(255, 255, 255, 0.15);
-  backdrop-filter:blur(6.1px);
-  -webkit-backdrop-filter:blur(6.1px);
-}
 .ms-recipe-art{
   font-size:26cqmin;
   line-height:1;
@@ -268,7 +471,7 @@ html, body {
 .ms-recipe-name{
   font-size:4.2cqmin;
   font-weight:900;
-  color:var(--ink);
+  color:#fff;
   text-align:center;
   line-height:1.05;
 }
@@ -590,6 +793,63 @@ html, body {
      Drop transparent PNG URLs in here later and they auto-replace the
      emoji. Leave a value empty ("") to use the emoji fallback.
      =================================================================== */
+  const CITIES = [
+    {
+      name: "Osaka",
+      country: "Japan",
+      intro: "Lanterns glow over Dotonbori while street-food crowds line up for your first sushi shift."
+    },
+    {
+      name: "Seoul",
+      country: "Korea",
+      intro: "Neon signs, palace gates, and late-night markets make this a fast, sparkling stop."
+    },
+    {
+      name: "NYC",
+      country: "USA",
+      intro: "Serve a rush-hour crowd between skyscrapers, yellow cabs, and hungry city cats."
+    },
+    {
+      name: "Paris",
+      country: "France",
+      intro: "A riverside cafe shift awaits, with soft lights, tiny tables, and stylish sushi orders."
+    },
+    {
+      name: "London",
+      country: "England",
+      intro: "Mist, clock towers, and cozy shopfronts set the scene for a proper sushi service."
+    },
+    {
+      name: "Mishor",
+      country: "Egypt",
+      intro: "Golden sands and ancient silhouettes surround a warm desert-night sushi stop."
+    },
+    {
+      name: "Sydney",
+      country: "Australia",
+      intro: "Harbor breezes and bright sails carry your sushi cart into a sunny seaside shift."
+    },
+    {
+      name: "Bangkok",
+      country: "Thailand",
+      intro: "Temple roofs, floating markets, and busy night streets keep the orders moving."
+    },
+    {
+      name: "Dhaka",
+      country: "Bangladesh",
+      intro: "Rickshaw colors and riverside energy turn this stop into a lively sushi adventure."
+    },
+    {
+      name: "Neo-Tokyo",
+      country: "Japan",
+      intro: "Holograms, high-speed trains, and midnight rooftops close the route in future style."
+    }
+  ].map((city, i) => ({
+    ...city,
+    id: i + 1,
+    background: `/sushi/assets/bg-level-${String(i + 1).padStart(2, "0")}.jpg`
+  }));
+
   const ASSETS = {
     cats: {            // by cat id, then state: neutral / happy / sad
       "cat-01": {
@@ -681,6 +941,8 @@ html, body {
     MAX_PREP_SLOTS: 5,
     POINTS_CORRECT: 5,
     POINTS_WRONG:   1,
+    ORDERS_PER_LEVEL: 5,
+    LEVEL_COUNT: 10,
     NEXT_ROUND_MS:  1500
   };
 
@@ -695,10 +957,14 @@ html, body {
      =================================================================== */
   let state = {
     score: 0,
+    level: 1,
+    route: [],
+    ordersThisLevel: 0,
     order: null,     // current recipe
     catId: null,     // current cat family
     prep: [],        // array of ingredient ids
-    locked: false    // true while showing a reaction
+    locked: false,   // true while showing a reaction
+    levelStats: null
   };
 
   /* ===================================================================
@@ -706,6 +972,24 @@ html, body {
      =================================================================== */
   const el = {
     game:       document.getElementById("ms-game"),
+    homeScreen: document.getElementById("ms-home-screen"),
+    levelScreen:document.getElementById("ms-level-screen"),
+    summaryScreen:document.getElementById("ms-summary-screen"),
+    completeScreen:document.getElementById("ms-complete-screen"),
+    play:       document.getElementById("ms-play"),
+    levelStart: document.getElementById("ms-level-start"),
+    levelKicker:document.getElementById("ms-level-kicker"),
+    levelTitle: document.getElementById("ms-level-title"),
+    levelCopy:  document.getElementById("ms-level-copy"),
+    summaryKicker:document.getElementById("ms-summary-kicker"),
+    summaryTitle:document.getElementById("ms-summary-title"),
+    summaryEarned:document.getElementById("ms-summary-earned"),
+    summaryCorrect:document.getElementById("ms-summary-correct"),
+    summaryWrong:document.getElementById("ms-summary-wrong"),
+    summaryOrders:document.getElementById("ms-summary-orders"),
+    summaryNext:document.getElementById("ms-summary-next"),
+    replay:     document.getElementById("ms-replay"),
+    completeCopy:document.getElementById("ms-complete-copy"),
     score:      document.getElementById("ms-score"),
     recipe:     document.getElementById("ms-recipe"),
     recipeArt:  document.getElementById("ms-recipe-art"),
@@ -757,6 +1041,49 @@ html, body {
     if (catQueue.length === 0) refillCatQueue();
     lastCatId = catQueue.shift();
     return lastCatId;
+  }
+
+  function screen(name) {
+    const screens = [el.homeScreen, el.levelScreen, el.summaryScreen, el.completeScreen];
+    screens.forEach(node => node.classList.remove("is-active"));
+    if (name === "home") el.homeScreen.classList.add("is-active");
+    if (name === "level") el.levelScreen.classList.add("is-active");
+    if (name === "summary") el.summaryScreen.classList.add("is-active");
+    if (name === "complete") el.completeScreen.classList.add("is-active");
+  }
+
+  function currentLevel() { return state.route[state.level - 1] || CITIES[0]; }
+
+  function setLevelBackground() {
+    const level = currentLevel();
+    document.documentElement.style.setProperty("--ms-level-bg", `url("${level.background}")`);
+  }
+
+  function freshLevelStats() {
+    return {
+      earned: 0,
+      correct: 0,
+      wrong: 0,
+      orders: Object.fromEntries(RECIPES.map(recipe => [recipe.id, 0]))
+    };
+  }
+
+  function resetGameProgress() {
+    state.score = 0;
+    state.level = 1;
+    state.route = shuffled(CITIES);
+    state.ordersThisLevel = 0;
+    state.order = null;
+    state.catId = null;
+    state.prep = [];
+    state.locked = true;
+    state.levelStats = freshLevelStats();
+    catQueue = [];
+    lastCatId = null;
+    renderScore();
+    renderPrep();
+    refreshGridState();
+    setLevelBackground();
   }
 
   /* ===================================================================
@@ -856,6 +1183,67 @@ html, body {
     }, 200);
   }
 
+  function showLevelIntro() {
+    const level = currentLevel();
+    setLevelBackground();
+    el.levelKicker.textContent = "level " + state.level;
+    el.levelTitle.textContent = level.name + ", " + level.country;
+    el.levelCopy.textContent = level.intro + " " + CONFIG.ORDERS_PER_LEVEL + " orders are waiting.";
+    el.levelStart.textContent = "start shift";
+    state.locked = true;
+    el.cat.classList.remove("is-entering", "is-leaving");
+    el.cat.classList.add("is-hidden");
+    el.recipe.classList.add("is-hidden");
+    screen("level");
+  }
+
+  function startLevel() {
+    state.ordersThisLevel = 0;
+    state.levelStats = freshLevelStats();
+    state.prep = [];
+    state.order = null;
+    renderPrep();
+    refreshGridState();
+    screen();
+    nextRound();
+  }
+
+  function renderSummaryOrders() {
+    const rows = RECIPES
+      .filter(recipe => state.levelStats.orders[recipe.id] > 0)
+      .map(recipe => {
+        const count = state.levelStats.orders[recipe.id];
+        return `<div class="ms-summary-order">
+                  ${visual(ASSETS.recipeCards[recipe.id], recipe.emoji, recipe.name)}
+                  <span class="ms-summary-order-name">${recipe.name}</span>
+                  <span class="ms-summary-order-count">x${count}</span>
+                </div>`;
+      });
+    el.summaryOrders.innerHTML = rows.join("");
+  }
+
+  function showLevelSummary() {
+    state.locked = true;
+    el.summaryKicker.textContent = "level " + state.level + " complete";
+    el.summaryTitle.textContent = currentLevel().name + " summary";
+    el.summaryEarned.textContent = state.levelStats.earned;
+    el.summaryCorrect.textContent = state.levelStats.correct;
+    el.summaryWrong.textContent = state.levelStats.wrong;
+    el.summaryNext.textContent = state.level >= CONFIG.LEVEL_COUNT ? "finish" : "continue";
+    renderSummaryOrders();
+    screen("summary");
+  }
+
+  function continueFromSummary() {
+    if (state.level >= CONFIG.LEVEL_COUNT) {
+      el.completeCopy.textContent = "you earned " + state.score + " coins across the whole world route.";
+      screen("complete");
+      return;
+    }
+    state.level++;
+    showLevelIntro();
+  }
+
   /* ===================================================================
      GAME ACTIONS
      =================================================================== */
@@ -890,6 +1278,10 @@ html, body {
     const gained  = correct ? CONFIG.POINTS_CORRECT : CONFIG.POINTS_WRONG;
 
     state.score += gained;
+    state.ordersThisLevel++;
+    state.levelStats.earned += gained;
+    state.levelStats[correct ? "correct" : "wrong"]++;
+    state.levelStats.orders[state.order.id]++;
     renderScore();
 
     // Score coin pop
@@ -918,7 +1310,11 @@ html, body {
           setTimeout(() => {
             el.cat.classList.remove("is-leaving");
             el.cat.classList.add("is-hidden");
-            nextRound();
+            if (state.ordersThisLevel >= CONFIG.ORDERS_PER_LEVEL) {
+              showLevelSummary();
+            } else {
+              nextRound();
+            }
           }, 400);
         });
       }, 2000);
@@ -982,16 +1378,27 @@ html, body {
 
   el.clear.addEventListener("click", clearPrep);
   el.serve.addEventListener("click", serve);
+  el.play.addEventListener("click", () => {
+    resetGameProgress();
+    showLevelIntro();
+  });
+  el.levelStart.addEventListener("click", startLevel);
+  el.summaryNext.addEventListener("click", continueFromSummary);
+  el.replay.addEventListener("click", () => {
+    resetGameProgress();
+    screen("home");
+  });
 
   /* ===================================================================
      INIT
      =================================================================== */
   function init() {
     buildGrid();
+    resetGameProgress();
     renderScore();
     el.cat.classList.add("is-hidden");
     el.recipe.classList.add("is-hidden");
-    nextRound();
+    screen("home");
   }
 
   function preloadAssets(onComplete) {
