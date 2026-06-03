@@ -25,6 +25,36 @@
     <div class="ms-screen ms-screen-home" id="ms-home-screen">
       <div class="ms-screen-panel">
         <button class="ms-screen-btn ms-play-btn" id="ms-play" type="button"><span aria-hidden="true"></span>play</button>
+        <div class="ms-home-actions">
+          <button class="ms-screen-btn ms-home-small-btn" id="ms-how-to-play" type="button">how to play</button>
+          <button class="ms-screen-btn ms-home-small-btn" id="ms-credits" type="button">credits</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ms-screen ms-screen-info" id="ms-how-screen">
+      <div class="ms-info-panel">
+        <button class="ms-info-close" id="ms-how-close" type="button" aria-label="Close how to play">x</button>
+        <div class="ms-screen-kicker">how to play</div>
+        <h2>meowsushi</h2>
+        <ul class="ms-how-list">
+          <li>look at the sushi order card.</li>
+          <li>tap the ingredients the cat wants.</li>
+          <li>check your prep tray before serving.</li>
+          <li>press serve when your sushi matches.</li>
+          <li>use clear if you want to start over.</li>
+          <li>make the right sushi to earn coins.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ms-screen ms-screen-info" id="ms-credits-screen">
+      <div class="ms-info-panel">
+        <button class="ms-info-close" id="ms-credits-close" type="button" aria-label="Close credits">x</button>
+        <div class="ms-screen-kicker">credits</div>
+        <h2>meowsushi</h2>
+        <p>MeowSushi was conceptualized and developed by Kazi Ahmed, blending game design, AI-assisted development, and custom-generated kawaii art direction into a small browser-based sushi adventure.</p>
+        <p>Learn more at <a href="https://kaziahmed.net" target="_blank" rel="noopener">kaziahmed.net</a>.</p>
       </div>
     </div>
 
@@ -221,7 +251,7 @@ html, body {
 }
 .ms-screen-home .ms-screen-panel{
   position:absolute;
-  top:72cqmin;
+  top:126cqmin;
   width:auto;
   padding:0;
   border:none;
@@ -231,7 +261,8 @@ html, body {
   -webkit-backdrop-filter:none;
 }
 .ms-play-btn{
-  min-width:36cqmin;
+  width:45.7cqmin;
+  min-width:45.7cqmin;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -256,6 +287,110 @@ html, body {
   border-top:2.3cqmin solid transparent;
   border-bottom:2.3cqmin solid transparent;
   border-left:3.4cqmin solid #7a2a00;
+}
+.ms-home-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  justify-content:center;
+  gap:1.7cqmin;
+  margin-top:1.7cqmin;
+}
+.ms-screen-btn.ms-home-small-btn{
+  width:22cqmin;
+  min-width:0;
+  border:.42cqmin solid #5b8f39;
+  border-radius:2.2cqmin;
+  color:#294817;
+  font-size:2.25cqmin;
+  line-height:1;
+  padding:1.15cqmin .8cqmin;
+  white-space:nowrap;
+  box-shadow:0 .48cqmin 0 #4a6f25, 0 .85cqmin 1.2cqmin rgba(90,9,9,.2);
+  background:
+    radial-gradient(80% 120% at 28% 0%, rgba(255,255,255,.72), rgba(255,255,255,0) 30%),
+    linear-gradient(180deg, #d9f7a4 0%, #9bdc4a 100%);
+}
+.ms-screen-btn.ms-home-small-btn:nth-child(2){
+  border-color:#4f9db5;
+  color:#143f52;
+  box-shadow:0 .48cqmin 0 #27758d, 0 .85cqmin 1.2cqmin rgba(90,9,9,.2);
+  background:
+    radial-gradient(80% 120% at 28% 0%, rgba(255,255,255,.72), rgba(255,255,255,0) 30%),
+    linear-gradient(180deg, #bcefff 0%, #6fc7e6 100%);
+}
+.ms-screen-info{
+  background:url("/sushi/assets/bg-home.jpg") center / cover no-repeat;
+}
+.ms-screen-info::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(33, 4, 4, .64);
+  pointer-events:none;
+}
+.ms-info-panel{
+  position:relative;
+  z-index:1;
+  width:min(76cqmin, 100%);
+  border:.7cqmin solid var(--outline);
+  border-radius:3.2cqmin;
+  background:rgba(255,243,230,.95);
+  box-shadow:0 2cqmin 5cqmin rgba(62,10,10,.36);
+  color:var(--ink);
+  text-align:center;
+  padding:5.8cqmin 4cqmin 4.2cqmin;
+  backdrop-filter:blur(7px);
+  -webkit-backdrop-filter:blur(7px);
+}
+.ms-info-panel h2{
+  font-size:6.2cqmin;
+  line-height:.95;
+  font-weight:900;
+  margin:.8cqmin 0 2cqmin;
+}
+.ms-info-panel p{
+  font-size:3.15cqmin;
+  line-height:1.18;
+  font-weight:700;
+  margin:0 auto 2.4cqmin;
+}
+.ms-info-panel p:last-child{ margin-bottom:0; }
+.ms-info-panel a{
+  color:#a70000;
+  font-weight:900;
+}
+.ms-how-list{
+  width:min(58cqmin, 100%);
+  margin:0 auto;
+  padding-left:4.2cqmin;
+  text-align:left;
+  font-size:3.2cqmin;
+  line-height:1.22;
+  font-weight:800;
+}
+.ms-how-list li{
+  margin:0 0 1.5cqmin;
+}
+.ms-how-list li:last-child{ margin-bottom:0; }
+.ms-info-close{
+  position:absolute;
+  top:1.4cqmin;
+  right:1.4cqmin;
+  width:6.2cqmin;
+  aspect-ratio:1;
+  border:.45cqmin solid var(--outline);
+  border-radius:50%;
+  background:#fff8ef;
+  color:var(--ink);
+  font:900 3.8cqmin/1 "Fredoka", system-ui, sans-serif;
+  text-transform:lowercase;
+  box-shadow:0 .45cqmin 0 var(--outline);
+  cursor:pointer;
+  touch-action:manipulation;
+}
+.ms-info-close:active{
+  transform:translateY(.35cqmin);
+  box-shadow:0 .1cqmin 0 var(--outline);
 }
 .ms-screen-level{
   background:
@@ -1054,10 +1189,16 @@ html, body {
   const el = {
     game:       document.getElementById("ms-game"),
     homeScreen: document.getElementById("ms-home-screen"),
+    howScreen:  document.getElementById("ms-how-screen"),
+    creditsScreen:document.getElementById("ms-credits-screen"),
     levelScreen:document.getElementById("ms-level-screen"),
     summaryScreen:document.getElementById("ms-summary-screen"),
     completeScreen:document.getElementById("ms-complete-screen"),
     play:       document.getElementById("ms-play"),
+    howToPlay:  document.getElementById("ms-how-to-play"),
+    credits:    document.getElementById("ms-credits"),
+    howClose:   document.getElementById("ms-how-close"),
+    creditsClose:document.getElementById("ms-credits-close"),
     levelStart: document.getElementById("ms-level-start"),
     levelKicker:document.getElementById("ms-level-kicker"),
     levelTitle: document.getElementById("ms-level-title"),
@@ -1126,9 +1267,11 @@ html, body {
   }
 
   function screen(name) {
-    const screens = [el.homeScreen, el.levelScreen, el.summaryScreen, el.completeScreen];
+    const screens = [el.homeScreen, el.howScreen, el.creditsScreen, el.levelScreen, el.summaryScreen, el.completeScreen];
     screens.forEach(node => node.classList.remove("is-active"));
     if (name === "home") el.homeScreen.classList.add("is-active");
+    if (name === "how") el.howScreen.classList.add("is-active");
+    if (name === "credits") el.creditsScreen.classList.add("is-active");
     if (name === "level") el.levelScreen.classList.add("is-active");
     if (name === "summary") el.summaryScreen.classList.add("is-active");
     if (name === "complete") el.completeScreen.classList.add("is-active");
@@ -1480,6 +1623,10 @@ html, body {
     resetGameProgress();
     showLevelIntro();
   });
+  el.howToPlay.addEventListener("click", () => screen("how"));
+  el.credits.addEventListener("click", () => screen("credits"));
+  el.howClose.addEventListener("click", () => screen("home"));
+  el.creditsClose.addEventListener("click", () => screen("home"));
   el.levelStart.addEventListener("click", startLevel);
   el.summaryNext.addEventListener("click", continueFromSummary);
   el.replay.addEventListener("click", () => {
