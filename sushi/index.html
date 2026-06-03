@@ -15,13 +15,6 @@
 
       <!-- ---------- CUSTOMER AREA (recipe card + cat) ---------- -->
       <section class="ms-customer">
-        <div class="ms-clouds" aria-hidden="true">
-          <span class="ms-cloud ms-cloud-1">☁️</span>
-          <span class="ms-cloud ms-cloud-2">☁️</span>
-          <span class="ms-cloud ms-cloud-3">☁️</span>
-          <span class="ms-cloud ms-cloud-4">☁️</span>
-          <span class="ms-cloud ms-cloud-5">☁️</span>
-        </div>
         <div class="ms-score-coin"><span class="ms-score-value" id="ms-score">0</span></div>
 
         <!-- LEFT: recipe / order card -->
@@ -118,7 +111,7 @@ html, body {
    height so it always stays a visible 9:16 frame with no scrolling.
    --------------------------------------------------------------------- */
 .ms-game{
-  width:min(100%, calc(92vh * 9 / 16));
+  width:min(100%, calc(92svh * 9 / 16));
   aspect-ratio:9 / 16;
   container-type:size;           /* enables cqmin units inside */
   border-radius:var(--r-box);
@@ -207,62 +200,6 @@ html, body {
   border:none;
   box-shadow:none;
 }
-.ms-clouds{
-  position:absolute;
-  inset:0;
-  overflow:hidden;
-  pointer-events:none;
-  z-index:0;
-}
-.ms-cloud{
-  position:absolute;
-  left:-18cqmin;
-  color:#ffffff;
-  font-size:12cqmin;
-  line-height:1;
-  opacity:.82;
-  filter:drop-shadow(0 .8cqmin 0 rgba(96,160,190,.16));
-  animation:ms-cloud-drift 28s linear infinite;
-}
-.ms-cloud-1{
-  top:8cqmin;
-  font-size:18cqmin;
-  opacity:.58;
-  animation-duration:48s;
-}
-.ms-cloud-2{
-  top:25cqmin;
-  font-size:9cqmin;
-  opacity:.65;
-  animation-delay:-12s;
-  animation-duration:42s;
-}
-.ms-cloud-3{
-  top:5cqmin;
-  font-size:6cqmin;
-  opacity:.5;
-  animation-delay:-24s;
-  animation-duration:52s;
-}
-.ms-cloud-4{
-  top:18cqmin;
-  font-size:24cqmin;
-  opacity:.38;
-  animation-delay:-30s;
-  animation-duration:64s;
-}
-.ms-cloud-5{
-  top:35cqmin;
-  font-size:13cqmin;
-  opacity:.48;
-  animation-delay:-6s;
-  animation-duration:56s;
-}
-@keyframes ms-cloud-drift{
-  from{ transform:translateX(-12cqmin); }
-  to{ transform:translateX(130cqmin); }
-}
-
 /* ---- Recipe / order card ---- */
 .ms-recipe{
   position:absolute;
@@ -345,6 +282,7 @@ html, body {
   line-height:1;
   /* pushed down so only the top "half body" peeks in */
   transform:translateY(14%);
+  will-change:transform;
   transition:opacity .18s ease, transform .25s ease;
   animation:ms-bob 2.4s ease-in-out infinite;
 }
@@ -468,7 +406,7 @@ html, body {
 }
 .ms-ing-emoji{ font-size:6cqmin; line-height:1; }
 .ms-ing-emoji img{ width:24cqmin; height:24cqmin; object-fit:contain; }
-.ms-ing:hover{ filter:brightness(1.08); }
+@media (hover:hover){ .ms-ing:hover{ filter:brightness(1.08); } }
 .ms-ing:active{ transform:scale(.93); }
 /* already-used ingredient */
 .ms-ing.is-used{
@@ -506,7 +444,7 @@ html, body {
   text-shadow:none;
 }
 .ms-btn:active{ transform:translateY(.8cqmin) scale(.98); }
-.ms-btn:hover{ filter:brightness(1.06); }
+@media (hover:hover){ .ms-btn:hover{ filter:brightness(1.06); } }
 .ms-btn-clear{
   background:#EFA088;
   border:.6cqmin solid #D98668;
@@ -527,8 +465,7 @@ html, body {
 
 /* respect reduced-motion */
 @media (prefers-reduced-motion:reduce){
-  .ms-cat-face,
-  .ms-cloud{ animation:none !important; }
+  .ms-cat-face{ animation:none !important; }
 }
 </style>
 
