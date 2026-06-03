@@ -204,7 +204,7 @@ html, body {
   aspect-ratio:6 / 5;
   position:relative;
   overflow:hidden;
-  background:linear-gradient(180deg, #bfeaff 0%, #dff7ff 62%, #fff2e8 100%);
+  background:#dff7ff url("/sushi/assets/bg-level-01.jpg") center / cover no-repeat;
   border-radius:0;
   border:none;
   box-shadow:none;
@@ -591,10 +591,32 @@ html, body {
      emoji. Leave a value empty ("") to use the emoji fallback.
      =================================================================== */
   const ASSETS = {
-    cats: {            // by state: neutral / happy / sad
-      neutral: "/sushi/assets/cat_ordering.png",
-      happy:   "/sushi/assets/cat_happy.png",
-      sad:     "/sushi/assets/cat_sad.png"
+    cats: {            // by cat id, then state: neutral / happy / sad
+      "cat-01": {
+        neutral: "/sushi/assets/cat-01-neutral.png",
+        happy:   "/sushi/assets/cat-01-happy.png",
+        sad:     "/sushi/assets/cat-01-sad.png"
+      },
+      "cat-02": {
+        neutral: "/sushi/assets/cat-02-neutral.png",
+        happy:   "/sushi/assets/cat-02-happy.png",
+        sad:     "/sushi/assets/cat-02-sad.png"
+      },
+      "cat-03": {
+        neutral: "/sushi/assets/cat-03-neutral.png",
+        happy:   "/sushi/assets/cat-03-happy.png",
+        sad:     "/sushi/assets/cat-03-sad.png"
+      },
+      "cat-04": {
+        neutral: "/sushi/assets/cat-04-neutral.png",
+        happy:   "/sushi/assets/cat-04-happy.png",
+        sad:     "/sushi/assets/cat-04-sad.png"
+      },
+      "cat-05": {
+        neutral: "/sushi/assets/cat-05-neutral.png",
+        happy:   "/sushi/assets/cat-05-happy.png",
+        sad:     "/sushi/assets/cat-05-sad.png"
+      }
     },
     recipeCards: {     // keyed by recipe id
       salmon_sashimi:    "/sushi/assets/sushi_salmon_sashimi.png",
@@ -674,6 +696,7 @@ html, body {
   let state = {
     score: 0,
     order: null,     // current recipe
+    catId: null,     // current cat family
     prep: [],        // array of ingredient ids
     locked: false    // true while showing a reaction
   };
@@ -709,6 +732,32 @@ html, body {
   const rand  = arr => arr[Math.floor(Math.random() * arr.length)];
   const setsEqual = (a, b) =>
     a.length === b.length && a.every(x => b.includes(x));
+  const CAT_IDS = Object.keys(ASSETS.cats);
+  let catQueue = [];
+  let lastCatId = null;
+
+  function shuffled(items) {
+    const copy = items.slice();
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function refillCatQueue() {
+    catQueue = shuffled(CAT_IDS);
+    if (catQueue.length > 1 && catQueue[0] === lastCatId) {
+      const swapIndex = catQueue.findIndex(id => id !== lastCatId);
+      [catQueue[0], catQueue[swapIndex]] = [catQueue[swapIndex], catQueue[0]];
+    }
+  }
+
+  function nextCatId() {
+    if (catQueue.length === 0) refillCatQueue();
+    lastCatId = catQueue.shift();
+    return lastCatId;
+  }
 
   /* ===================================================================
      RENDERERS
@@ -761,7 +810,10 @@ html, body {
 
   function setCat(stateName) {
     const map = { neutral: "🐱", happy: "😸", sad: "😿" };
-    el.catFace.innerHTML = visual(ASSETS.cats[stateName], map[stateName], stateName + " cat");
+    const catId = state.catId || CAT_IDS[0];
+    const catAssets = ASSETS.cats[catId] || {};
+    const label = catId + " " + stateName + " cat";
+    el.catFace.innerHTML = visual(catAssets[stateName], map[stateName], label);
     el.cat.classList.remove("is-happy", "is-sad");
     if (stateName === "happy") el.cat.classList.add("is-happy");
     if (stateName === "sad")   el.cat.classList.add("is-sad");
@@ -880,6 +932,7 @@ html, body {
       while (state.order && next.id === state.order.id) next = rand(RECIPES);
     }
     state.order  = next;
+    state.catId  = nextCatId();
     state.prep   = [];
     state.locked = true;   // stays locked throughout the intro sequence
 
@@ -943,7 +996,7 @@ html, body {
 
   function preloadAssets(onComplete) {
     const urls = [
-      ...Object.values(ASSETS.cats),
+      ...Object.values(ASSETS.cats).flatMap(cat => Object.values(cat)),
       ...Object.values(ASSETS.recipeCards),
       ...Object.values(ASSETS.ingredients),
       ...Object.values(ASSETS.preparedIngredients)
