@@ -32,15 +32,16 @@
       <div class="ms-screen-panel">
         <div class="ms-screen-kicker" id="ms-level-kicker">level 1</div>
         <h2 id="ms-level-title">next city</h2>
-        <p id="ms-level-copy">5 orders are waiting.</p>
-        <button class="ms-screen-btn" id="ms-level-start" type="button">start shift</button>
+        <div class="ms-level-country" id="ms-level-country">country</div>
+        <p id="ms-level-copy">description</p>
+        <button class="ms-screen-btn" id="ms-level-start" type="button">start</button>
       </div>
     </div>
 
     <div class="ms-screen ms-screen-summary" id="ms-summary-screen">
       <div class="ms-summary-panel">
         <div class="ms-screen-kicker" id="ms-summary-kicker">level complete</div>
-        <h2 id="ms-summary-title">shift summary</h2>
+        <h2 id="ms-summary-title">city</h2>
         <div class="ms-summary-stats">
           <div><span id="ms-summary-earned">0</span><small>coins</small></div>
           <div><span id="ms-summary-correct">0</span><small>served</small></div>
@@ -262,6 +263,12 @@ html, body {
     var(--ms-level-bg, url("/sushi/assets/bg-level-01.jpg")) center / cover no-repeat,
     #dff7ff;
 }
+.ms-screen-summary{
+  background:
+    linear-gradient(180deg, rgba(62,10,10,.22), rgba(62,10,10,.82)),
+    var(--ms-level-bg, url("/sushi/assets/bg-level-01.jpg")) center / cover no-repeat,
+    #dff7ff;
+}
 .ms-screen-panel,
 .ms-summary-panel{
   width:min(74cqmin, 100%);
@@ -305,6 +312,13 @@ html, body {
   color:#a70000;
   font-size:3.2cqmin;
   font-weight:900;
+}
+.ms-level-country{
+  color:#7a1414;
+  font-size:4cqmin;
+  font-weight:900;
+  line-height:1;
+  margin:0 0 1.3cqmin;
 }
 .ms-screen-btn{
   min-width:30cqmin;
@@ -468,6 +482,7 @@ html, body {
   font-size:26cqmin;
   line-height:1;
   margin-bottom:-2cqmin;
+  transform-origin:center;
 }
 .ms-recipe-art img{ width:44cqmin; height:44cqmin; object-fit:contain; }
 .ms-recipe-name{
@@ -799,13 +814,55 @@ html, body {
   70% { transform:scale(1.06); opacity:1; }
   to  { transform:scale(1);    opacity:1; }
 }
-@keyframes ms-recipe-out{
-  from{ transform:scale(1);   opacity:1; }
-  to  { transform:scale(.55); opacity:0; }
+@keyframes ms-recipe-shell-done{
+  0%{
+    background:rgba(255, 255, 255, 0.15);
+    border-color:rgba(255, 255, 255, 1);
+    box-shadow:0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter:blur(6.1px);
+    -webkit-backdrop-filter:blur(6.1px);
+  }
+  55%{
+    background:rgba(255, 255, 255, 0);
+    border-color:rgba(255, 255, 255, 0);
+    box-shadow:0 1.4cqmin 3cqmin rgba(0, 0, 0, 0);
+    backdrop-filter:blur(0);
+    -webkit-backdrop-filter:blur(0);
+  }
+  100%{
+    background:rgba(255, 255, 255, 0);
+    border-color:rgba(255, 255, 255, 0);
+    box-shadow:none;
+    backdrop-filter:blur(0);
+    -webkit-backdrop-filter:blur(0);
+  }
+}
+@keyframes ms-recipe-detail-done{
+  0%{ transform:scale(1); opacity:1; }
+  45%{ transform:scale(1.12); opacity:1; }
+  100%{ transform:scale(.3); opacity:0; }
+}
+@keyframes ms-recipe-art-done{
+  0%{ transform:scale(1) rotate(0); opacity:1; }
+  28%{ transform:scale(1.2) rotate(-8deg); opacity:1; }
+  48%{ transform:scale(1.16) rotate(5deg); opacity:1; }
+  66%{ transform:scale(1.2) rotate(-4deg); opacity:1; }
+  80%{ transform:scale(1.3) rotate(7deg); opacity:1; }
+  100%{ transform:scale(0) rotate(18deg); opacity:0; }
 }
 .ms-recipe.is-hidden { opacity:0; pointer-events:none; transform:scale(.55); }
 .ms-recipe.is-showing{ animation:ms-recipe-in  .3s ease forwards; }
-.ms-recipe.is-hiding { animation:ms-recipe-out .2s ease forwards; }
+.ms-recipe.is-hiding {
+  pointer-events:none;
+  animation:ms-recipe-shell-done .7s ease forwards;
+}
+.ms-recipe.is-hiding .ms-recipe-art{
+  animation:ms-recipe-art-done 1.25s ease-in-out forwards;
+}
+.ms-recipe.is-hiding .ms-recipe-name,
+.ms-recipe.is-hiding .ms-recipe-needs{
+  animation:ms-recipe-detail-done .42s ease-in forwards;
+}
 </style>
 
 <script>
@@ -825,12 +882,12 @@ html, body {
     },
     {
       name: "Seoul",
-      country: "Korea",
+      country: "South Korea",
       intro: "Neon signs, palace gates, and late-night markets make this a fast, sparkling stop."
     },
     {
-      name: "NYC",
-      country: "USA",
+      name: "New York City",
+      country: "United States",
       intro: "Serve a rush-hour crowd between skyscrapers, yellow cabs, and hungry city cats."
     },
     {
@@ -840,11 +897,11 @@ html, body {
     },
     {
       name: "London",
-      country: "England",
+      country: "United Kingdom",
       intro: "Mist, clock towers, and cozy shopfronts set the scene for a proper sushi service."
     },
     {
-      name: "Mishor",
+      name: "Cairo",
       country: "Egypt",
       intro: "Golden sands and ancient silhouettes surround a warm desert-night sushi stop."
     },
@@ -1004,6 +1061,7 @@ html, body {
     levelStart: document.getElementById("ms-level-start"),
     levelKicker:document.getElementById("ms-level-kicker"),
     levelTitle: document.getElementById("ms-level-title"),
+    levelCountry: document.getElementById("ms-level-country"),
     levelCopy:  document.getElementById("ms-level-copy"),
     summaryKicker:document.getElementById("ms-summary-kicker"),
     summaryTitle:document.getElementById("ms-summary-title"),
@@ -1204,16 +1262,17 @@ html, body {
       el.recipe.classList.remove("is-hiding");
       el.recipe.classList.add("is-hidden");
       if (callback) callback();
-    }, 200);
+    }, 1250);
   }
 
   function showLevelIntro() {
     const level = currentLevel();
     setLevelBackground();
     el.levelKicker.textContent = "level " + state.level;
-    el.levelTitle.textContent = level.name + ", " + level.country;
-    el.levelCopy.textContent = level.intro + " " + CONFIG.ORDERS_PER_LEVEL + " orders are waiting.";
-    el.levelStart.textContent = "start shift";
+    el.levelTitle.textContent = level.name;
+    el.levelCountry.textContent = level.country;
+    el.levelCopy.textContent = level.intro;
+    el.levelStart.textContent = "start";
     state.locked = true;
     el.cat.classList.remove("is-entering", "is-leaving");
     el.cat.classList.add("is-hidden");
@@ -1248,8 +1307,9 @@ html, body {
 
   function showLevelSummary() {
     state.locked = true;
+    setLevelBackground();
     el.summaryKicker.textContent = "level " + state.level + " complete";
-    el.summaryTitle.textContent = currentLevel().name + " summary";
+    el.summaryTitle.textContent = currentLevel().name;
     el.summaryEarned.textContent = state.levelStats.earned;
     el.summaryCorrect.textContent = state.levelStats.correct;
     el.summaryWrong.textContent = state.levelStats.wrong;
