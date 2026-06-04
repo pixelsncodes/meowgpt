@@ -157,6 +157,12 @@
       </div>
 
     </div>
+    <div class="ms-tutorial" id="ms-tutorial" aria-live="polite">
+      <div class="ms-tutorial-dim"></div>
+      <div class="ms-tutorial-highlight" id="ms-tutorial-highlight"></div>
+      <div class="ms-tutorial-pointer" id="ms-tutorial-pointer" aria-hidden="true"></div>
+      <div class="ms-tutorial-card" id="ms-tutorial-card"></div>
+    </div>
   </div>
 </div>
 
@@ -966,9 +972,89 @@ html, body {
 @keyframes ms-nudge{ 0%,100%{transform:translateX(0);}
   25%{transform:translateX(-1.5cqmin);} 75%{transform:translateX(1.5cqmin);} }
 
+/* =====================================================================
+   FIRST ORDER TUTORIAL
+   ===================================================================== */
+.ms-tutorial{
+  position:absolute;
+  inset:0;
+  z-index:20;
+  pointer-events:none;
+  opacity:0;
+  visibility:hidden;
+  transition:opacity .18s ease, visibility .18s ease;
+}
+.ms-tutorial.is-active{
+  opacity:1;
+  visibility:visible;
+}
+.ms-tutorial-dim{
+  position:absolute;
+  inset:0;
+  background:rgba(62,10,10,.44);
+}
+.ms-tutorial-highlight{
+  position:absolute;
+  left:0;
+  top:0;
+  width:10cqmin;
+  height:10cqmin;
+  border:.9cqmin solid #fff8a8;
+  border-radius:3cqmin;
+  box-shadow:
+    0 0 0 999px rgba(62,10,10,.44),
+    0 0 0 1.3cqmin rgba(255,255,255,.42),
+    0 0 3cqmin rgba(255,248,168,.88);
+  transform:translate3d(0,0,0);
+  animation:ms-tutorial-pulse 1.05s ease-in-out infinite;
+}
+.ms-tutorial-card{
+  position:absolute;
+  left:5cqmin;
+  top:5cqmin;
+  width:68cqmin;
+  max-width:78cqmin;
+  padding:2.1cqmin 2.6cqmin;
+  border:.55cqmin solid var(--outline);
+  border-radius:2.4cqmin;
+  background:#fff8ef;
+  color:var(--ink);
+  font-size:3.25cqmin;
+  font-weight:900;
+  line-height:1.05;
+  text-align:center;
+  box-shadow:0 1cqmin 2.4cqmin rgba(62,10,10,.34);
+}
+.ms-tutorial-pointer{
+  position:absolute;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+  border-left:1.8cqmin solid transparent;
+  border-right:1.8cqmin solid transparent;
+  border-top:3cqmin solid #fff8ef;
+  filter:drop-shadow(0 .4cqmin 0 var(--outline));
+  transform-origin:50% 20%;
+}
+.ms-tutorial-pointer.is-above{
+  transform:rotate(180deg);
+}
+.ms-tutorial-target{
+  z-index:21;
+}
+.ms-tutorial-target:not(.ms-recipe){
+  position:relative;
+}
+@keyframes ms-tutorial-pulse{
+  0%,100%{ transform:translate3d(0,0,0) scale(1); }
+  50%{ transform:translate3d(0,0,0) scale(1.035); }
+}
+
 /* respect reduced-motion */
 @media (prefers-reduced-motion:reduce){
   .ms-cat-face{ animation:none !important; }
+  .ms-tutorial-highlight{ animation:none !important; }
 }
 
 .ms-loader{
@@ -1311,6 +1397,8 @@ html, body {
     sad:     ["Mrrp...", "Meow...", "Nyaaa...", "Mrow...", "Prrr..."]
   };
 
+  const TUTORIAL_RECIPE_ID = "salmon_nigiri";
+
   /* ===================================================================
      STATE
      =================================================================== */
@@ -1324,6 +1412,13 @@ html, body {
     prep: [],        // array of ingredient ids
     locked: false,   // true while showing a reaction
     levelStats: null
+  };
+  let tutorial = {
+    active: false,
+    completed: false,
+    step: null,
+    target: null,
+    repositionTimer: null
   };
 
   const bgm = new Audio();
@@ -1377,7 +1472,11 @@ html, body {
     serve:      document.getElementById("ms-serve"),
     musicToggle:document.getElementById("ms-music-toggle"),
     musicToggleIcon:document.getElementById("ms-music-toggle-icon"),
-    trackTitle: document.getElementById("ms-track-title")
+    trackTitle: document.getElementById("ms-track-title"),
+    tutorial:   document.getElementById("ms-tutorial"),
+    tutorialCard:document.getElementById("ms-tutorial-card"),
+    tutorialHighlight:document.getElementById("ms-tutorial-highlight"),
+    tutorialPointer:document.getElementById("ms-tutorial-pointer")
   };
 
   /* ===================================================================
@@ -1431,6 +1530,140 @@ html, body {
   }
 
   function currentLevel() { return state.route[state.level - 1] || CITIES[0]; }
+
+  function recipeById(id) {
+    return RECIPES.find(recipe => recipe.id === id) || RECIPES[0];
+  }
+
+  function resetTutorial() {
+    clearTimeout(tutorial.repositionTimer);
+    if (tutorial.target) tutorial.target.classList.remove("ms-tutorial-target");
+    tutorial = {
+      active: false,
+      completed: false,
+      step: null,
+      target: null,
+      repositionTimer: null
+    };
+    el.tutorial.classList.remove("is-active");
+  }
+
+  function isTutorialOrder() {
+    return state.level === 1 &&
+      state.ordersThisLevel === 0 &&
+      state.order &&
+      state.order.id === TUTORIAL_RECIPE_ID &&
+      !tutorial.completed;
+  }
+
+  function tutorialTargetFor(step) {
+    if (step === "order") return el.recipe;
+    if (step === "salmon") return el.grid.querySelector('[data-add="salmon"]');
+    if (step === "rice") return el.grid.querySelector('[data-add="rice"]');
+    if (step === "prep") return el.prep;
+    if (step === "serve") return el.serve;
+    return null;
+  }
+
+  function tutorialCopyFor(step) {
+    if (step === "order") return "this cat wants salmon nigiri. it needs salmon and rice.";
+    if (step === "salmon") return "tap the salmon.";
+    if (step === "rice") return "now tap the rice.";
+    if (step === "prep") return "perfect. salmon and rice are ready in your tray.";
+    if (step === "serve") return "tap serve to finish the order.";
+    return "";
+  }
+
+  function positionTutorial() {
+    if (!tutorial.active || !tutorial.target) return;
+
+    const gameRect = el.game.getBoundingClientRect();
+    const targetRect = tutorial.target.getBoundingClientRect();
+    const pad = Math.max(8, gameRect.width * 0.018);
+    const left = targetRect.left - gameRect.left - pad;
+    const top = targetRect.top - gameRect.top - pad;
+    const width = targetRect.width + pad * 2;
+    const height = targetRect.height + pad * 2;
+
+    el.tutorialHighlight.style.left = left + "px";
+    el.tutorialHighlight.style.top = top + "px";
+    el.tutorialHighlight.style.width = width + "px";
+    el.tutorialHighlight.style.height = height + "px";
+
+    const cardRect = el.tutorialCard.getBoundingClientRect();
+    const gap = Math.max(10, gameRect.width * 0.03);
+    const cardWidth = cardRect.width || gameRect.width * 0.75;
+    const cardHeight = cardRect.height || gameRect.height * 0.08;
+    const minLeft = gameRect.width * 0.05;
+    const maxLeft = gameRect.width - cardWidth - minLeft;
+    const targetCenter = left + width / 2;
+    let cardLeft = targetCenter - cardWidth / 2;
+    cardLeft = Math.max(minLeft, Math.min(maxLeft, cardLeft));
+
+    const fitsAbove = top - gap - cardHeight > gameRect.height * 0.03;
+    const cardTop = fitsAbove ? top - gap - cardHeight : top + height + gap;
+    el.tutorialCard.style.left = cardLeft + "px";
+    el.tutorialCard.style.top = cardTop + "px";
+
+    const pointerLeft = targetCenter - 1.8 * gameRect.width / 100;
+    const pointerTop = fitsAbove ? cardTop + cardHeight - 1 : cardTop - 3 * gameRect.width / 100 + 1;
+    el.tutorialPointer.style.left = pointerLeft + "px";
+    el.tutorialPointer.style.top = pointerTop + "px";
+    el.tutorialPointer.classList.toggle("is-above", !fitsAbove);
+  }
+
+  function setTutorialStep(step) {
+    if (tutorial.target) tutorial.target.classList.remove("ms-tutorial-target");
+    tutorial.step = step;
+    tutorial.target = tutorialTargetFor(step);
+    if (!tutorial.target) return;
+    tutorial.target.classList.add("ms-tutorial-target");
+    el.tutorialCard.textContent = tutorialCopyFor(step);
+    el.tutorial.classList.add("is-active");
+    requestAnimationFrame(positionTutorial);
+  }
+
+  function startTutorialIfNeeded() {
+    if (!isTutorialOrder()) return;
+    tutorial.active = true;
+    setTutorialStep("order");
+    tutorial.repositionTimer = setTimeout(() => {
+      if (tutorial.active && tutorial.step === "order") setTutorialStep("salmon");
+    }, 1800);
+  }
+
+  function completeTutorial() {
+    clearTimeout(tutorial.repositionTimer);
+    if (tutorial.target) tutorial.target.classList.remove("ms-tutorial-target");
+    tutorial.active = false;
+    tutorial.completed = true;
+    tutorial.step = null;
+    tutorial.target = null;
+    el.tutorial.classList.remove("is-active");
+  }
+
+  function isTutorialAllowedAction(action, id) {
+    if (!tutorial.active) return true;
+    if (action === "view-order" && tutorial.step === "order") return true;
+    if (action === "add" && tutorial.step === "salmon" && id === "salmon") return true;
+    if (action === "add" && tutorial.step === "rice" && id === "rice") return true;
+    if (action === "serve" && tutorial.step === "serve") return true;
+    return false;
+  }
+
+  function advanceTutorialAfterAdd(id) {
+    if (!tutorial.active) return;
+    if (tutorial.step === "salmon" && id === "salmon") {
+      setTutorialStep("rice");
+      return;
+    }
+    if (tutorial.step === "rice" && id === "rice") {
+      setTutorialStep("prep");
+      tutorial.repositionTimer = setTimeout(() => {
+        if (tutorial.active && tutorial.step === "prep") setTutorialStep("serve");
+      }, 1200);
+    }
+  }
 
   function updateTrackTitle() {
     const title = LEVEL_TRACK_TITLES[currentLevel().id - 1] || "";
@@ -1551,6 +1784,7 @@ html, body {
   }
 
   function resetGameProgress() {
+    resetTutorial();
     state.score = 0;
     state.level = 1;
     state.route = shuffled(CITIES);
@@ -1747,15 +1981,18 @@ html, body {
      =================================================================== */
   function addIngredient(id) {
     if (state.locked) return;
+    if (!isTutorialAllowedAction("add", id)) return;
     if (state.prep.includes(id)) return;            // only once
     if (state.prep.length >= CONFIG.MAX_PREP_SLOTS) return;
     state.prep.push(id);
     renderPrep();
     refreshGridState();
+    advanceTutorialAfterAdd(id);
   }
 
   function removeIngredient(id) {
     if (state.locked) return;
+    if (tutorial.active) return;
     state.prep = state.prep.filter(x => x !== id);
     renderPrep();
     refreshGridState();
@@ -1763,6 +2000,7 @@ html, body {
 
   function clearPrep() {
     if (state.locked) return;
+    if (tutorial.active) return;
     state.prep = [];
     renderPrep();
     refreshGridState();
@@ -1770,6 +2008,8 @@ html, body {
 
   function serve() {
     if (state.locked) return;
+    if (!isTutorialAllowedAction("serve")) return;
+    if (tutorial.active) completeTutorial();
     state.locked = true;
 
     const correct = setsEqual(state.prep, state.order.ingredients);
@@ -1821,8 +2061,11 @@ html, body {
 
   function nextRound() {
     // avoid repeating the same order twice in a row when possible
-    let next = rand(RECIPES);
-    if (RECIPES.length > 1) {
+    const forceTutorialOrder = state.level === 1 && state.ordersThisLevel === 0 && !tutorial.completed;
+    let next = forceTutorialOrder
+      ? recipeById(TUTORIAL_RECIPE_ID)
+      : rand(RECIPES);
+    if (RECIPES.length > 1 && !forceTutorialOrder) {
       while (state.order && next.id === state.order.id) next = rand(RECIPES);
     }
     state.order  = next;
@@ -1854,6 +2097,7 @@ html, body {
           hideBubble(() => {
             showRecipe(() => {
               state.locked = false;
+              startTutorialIfNeeded();
             });
           });
         }, 800);
@@ -1869,6 +2113,14 @@ html, body {
   function isPrimaryInput(e) {
     return e.type === "click" || e.isPrimary !== false;
   }
+
+  el.recipe.addEventListener(fastInputEvent, e => {
+    if (!isPrimaryInput(e)) return;
+    if (!isTutorialAllowedAction("view-order")) return;
+    e.preventDefault();
+    clearTimeout(tutorial.repositionTimer);
+    setTutorialStep("salmon");
+  });
 
   el.grid.addEventListener(fastInputEvent, e => {
     if (!isPrimaryInput(e)) return;
@@ -1917,6 +2169,10 @@ html, body {
     stopMusic();
     resetGameProgress();
     screen("home");
+  });
+  window.addEventListener("resize", positionTutorial);
+  window.addEventListener("orientationchange", () => {
+    setTimeout(positionTutorial, 120);
   });
 
   /* ===================================================================
