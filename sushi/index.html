@@ -158,7 +158,10 @@
 
     </div>
     <div class="ms-tutorial" id="ms-tutorial" aria-live="polite">
-      <div class="ms-tutorial-dim"></div>
+      <div class="ms-tutorial-dim" data-tutorial-dim="top"></div>
+      <div class="ms-tutorial-dim" data-tutorial-dim="right"></div>
+      <div class="ms-tutorial-dim" data-tutorial-dim="bottom"></div>
+      <div class="ms-tutorial-dim" data-tutorial-dim="left"></div>
       <div class="ms-tutorial-highlight" id="ms-tutorial-highlight"></div>
       <div class="ms-tutorial-pointer" id="ms-tutorial-pointer" aria-hidden="true"></div>
       <div class="ms-tutorial-card">
@@ -981,7 +984,7 @@ html, body {
 .ms-tutorial{
   position:absolute;
   inset:0;
-  z-index:20;
+  z-index:40;
   pointer-events:none;
   opacity:0;
   visibility:hidden;
@@ -993,10 +996,15 @@ html, body {
 }
 .ms-tutorial-dim{
   position:absolute;
-  inset:0;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+  background:rgba(62,10,10,.44);
 }
 .ms-tutorial-highlight{
   position:absolute;
+  z-index:2;
   left:0;
   top:0;
   width:10cqmin;
@@ -1005,13 +1013,13 @@ html, body {
   border:.55cqmin solid #fff8a8;
   border-radius:3cqmin;
   box-shadow:
-    0 0 0 999px rgba(62,10,10,.44),
     0 0 0 .55cqmin rgba(255,255,255,.52),
     0 0 2cqmin rgba(255,248,168,.82);
   animation:ms-tutorial-pulse 1.05s ease-in-out infinite;
 }
 .ms-tutorial-card{
   position:absolute;
+  z-index:4;
   left:5cqmin;
   top:5cqmin;
   width:68cqmin;
@@ -1050,6 +1058,7 @@ html, body {
 }
 .ms-tutorial-pointer{
   position:absolute;
+  z-index:3;
   left:0;
   top:0;
   width:0;
@@ -1072,13 +1081,11 @@ html, body {
 @keyframes ms-tutorial-pulse{
   0%,100%{
     box-shadow:
-      0 0 0 999px rgba(62,10,10,.44),
       0 0 0 .55cqmin rgba(255,255,255,.52),
       0 0 2cqmin rgba(255,248,168,.82);
   }
   50%{
     box-shadow:
-      0 0 0 999px rgba(62,10,10,.44),
       0 0 0 .85cqmin rgba(255,255,255,.68),
       0 0 3cqmin rgba(255,248,168,1);
   }
@@ -1510,7 +1517,8 @@ html, body {
     tutorialCopy:document.getElementById("ms-tutorial-copy"),
     tutorialSkip:document.getElementById("ms-tutorial-skip"),
     tutorialHighlight:document.getElementById("ms-tutorial-highlight"),
-    tutorialPointer:document.getElementById("ms-tutorial-pointer")
+    tutorialPointer:document.getElementById("ms-tutorial-pointer"),
+    tutorialDims:  Array.from(document.querySelectorAll("[data-tutorial-dim]"))
   };
 
   /* ===================================================================
@@ -1615,45 +1623,57 @@ html, body {
     return "3.5cqmin";
   }
 
+  function setTutorialDim(name, left, top, width, height) {
+    const panel = el.tutorialDims.find(dim => dim.dataset.tutorialDim === name);
+    if (!panel) return;
+    panel.style.left = left + "px";
+    panel.style.top = top + "px";
+    panel.style.width = Math.max(0, width) + "px";
+    panel.style.height = Math.max(0, height) + "px";
+  }
+
   function positionTutorial() {
     if (!tutorial.active || !tutorial.target) return;
 
-    const gameRect = el.game.getBoundingClientRect();
+    const overlayRect = el.tutorial.getBoundingClientRect();
     const targetRect = tutorial.target.getBoundingClientRect();
-    const gameStyle = getComputedStyle(el.game);
-    const gameBorderLeft = parseFloat(gameStyle.borderLeftWidth) || 0;
-    const gameBorderTop = parseFloat(gameStyle.borderTopWidth) || 0;
-    const left = targetRect.left - gameRect.left - gameBorderLeft;
-    const top = targetRect.top - gameRect.top - gameBorderTop;
+    const left = targetRect.left - overlayRect.left;
+    const top = targetRect.top - overlayRect.top;
     const width = targetRect.width;
     const height = targetRect.height;
+    const overlayWidth = overlayRect.width;
+    const overlayHeight = overlayRect.height;
 
     el.tutorialHighlight.style.left = left + "px";
     el.tutorialHighlight.style.top = top + "px";
     el.tutorialHighlight.style.width = width + "px";
     el.tutorialHighlight.style.height = height + "px";
     el.tutorialHighlight.style.borderRadius = tutorialRadiusFor(tutorial.step);
+    setTutorialDim("top", 0, 0, overlayWidth, top);
+    setTutorialDim("right", left + width, top, overlayWidth - left - width, height);
+    setTutorialDim("bottom", 0, top + height, overlayWidth, overlayHeight - top - height);
+    setTutorialDim("left", 0, top, left, height);
 
     const card = el.tutorialCopy.parentElement;
     const cardRect = card.getBoundingClientRect();
     const gap = tutorial.step === "serve"
-      ? Math.max(18, gameRect.width * 0.055)
-      : Math.max(10, gameRect.width * 0.03);
-    const cardWidth = cardRect.width || gameRect.width * 0.75;
-    const cardHeight = cardRect.height || gameRect.height * 0.08;
-    const minLeft = gameRect.width * 0.05;
-    const maxLeft = gameRect.width - cardWidth - minLeft;
+      ? Math.max(18, overlayWidth * 0.055)
+      : Math.max(10, overlayWidth * 0.03);
+    const cardWidth = cardRect.width || overlayWidth * 0.75;
+    const cardHeight = cardRect.height || overlayHeight * 0.08;
+    const minLeft = overlayWidth * 0.05;
+    const maxLeft = overlayWidth - cardWidth - minLeft;
     const targetCenter = left + width / 2;
     let cardLeft = targetCenter - cardWidth / 2;
     cardLeft = Math.max(minLeft, Math.min(maxLeft, cardLeft));
 
-    const fitsAbove = top - gap - cardHeight > gameRect.height * 0.03;
+    const fitsAbove = top - gap - cardHeight > overlayHeight * 0.03;
     const cardTop = fitsAbove ? top - gap - cardHeight : top + height + gap;
     card.style.left = cardLeft + "px";
     card.style.top = cardTop + "px";
 
-    const pointerLeft = targetCenter - 1.8 * gameRect.width / 100;
-    const pointerTop = fitsAbove ? cardTop + cardHeight - 1 : cardTop - 3 * gameRect.width / 100 + 1;
+    const pointerLeft = targetCenter - 1.8 * overlayWidth / 100;
+    const pointerTop = fitsAbove ? cardTop + cardHeight - 1 : cardTop - 3 * overlayWidth / 100 + 1;
     el.tutorialPointer.style.left = pointerLeft + "px";
     el.tutorialPointer.style.top = pointerTop + "px";
     el.tutorialPointer.classList.toggle("is-above", !fitsAbove);
