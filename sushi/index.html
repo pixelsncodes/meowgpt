@@ -994,7 +994,6 @@ html, body {
 .ms-tutorial-dim{
   position:absolute;
   inset:0;
-  background:rgba(62,10,10,.44);
 }
 .ms-tutorial-highlight{
   position:absolute;
@@ -1637,7 +1636,9 @@ html, body {
 
     const card = el.tutorialCopy.parentElement;
     const cardRect = card.getBoundingClientRect();
-    const gap = Math.max(10, gameRect.width * 0.03);
+    const gap = tutorial.step === "serve"
+      ? Math.max(18, gameRect.width * 0.055)
+      : Math.max(10, gameRect.width * 0.03);
     const cardWidth = cardRect.width || gameRect.width * 0.75;
     const cardHeight = cardRect.height || gameRect.height * 0.08;
     const minLeft = gameRect.width * 0.05;
@@ -1676,7 +1677,7 @@ html, body {
     setTutorialStep("order");
     tutorial.repositionTimer = setTimeout(() => {
       if (tutorial.active && tutorial.step === "order") setTutorialStep("salmon");
-    }, 1800);
+    }, 4200);
   }
 
   function completeTutorial() {
