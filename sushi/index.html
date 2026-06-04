@@ -252,6 +252,8 @@ html, body {
 .ms-screen-home .ms-screen-panel{
   position:absolute;
   top:126cqmin;
+  left:50%;
+  transform:translateX(-50%);
   width:auto;
   padding:0;
   border:none;
@@ -261,51 +263,51 @@ html, body {
   -webkit-backdrop-filter:none;
 }
 .ms-play-btn{
-  width:45.7cqmin;
-  min-width:45.7cqmin;
+  width:70cqmin;
+  min-width:70cqmin;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:2.4cqmin;
-  border:.55cqmin solid #7a1414;
-  border-radius:4cqmin;
+  gap:3.2cqmin;
+  border:.75cqmin solid #7a1414;
+  border-radius:5cqmin;
   background:
     radial-gradient(80% 120% at 28% 0%, rgba(255,255,255,.82), rgba(255,255,255,0) 28%),
     linear-gradient(180deg, #ffe071 0%, #ffc64a 55%, #f6a61f 100%);
   color:#4a0a0a;
-  font-size:5.2cqmin;
-  padding:2.1cqmin 5cqmin;
+  font-size:7.2cqmin;
+  padding:3.2cqmin 6cqmin;
   box-shadow:
-    inset 0 .45cqmin 0 rgba(255,255,255,.58),
-    inset 0 -.55cqmin 0 rgba(154,75,0,.18),
-    0 .9cqmin 0 #6d0707,
-    0 1.5cqmin 2cqmin rgba(62,10,10,.28);
+    inset 0 .6cqmin 0 rgba(255,255,255,.58),
+    inset 0 -.75cqmin 0 rgba(154,75,0,.18),
+    0 1.1cqmin 0 #6d0707,
+    0 1.7cqmin 2.3cqmin rgba(62,10,10,.28);
 }
 .ms-play-btn span{
   width:0;
   height:0;
-  border-top:2.3cqmin solid transparent;
-  border-bottom:2.3cqmin solid transparent;
-  border-left:3.4cqmin solid #7a2a00;
+  border-top:3.1cqmin solid transparent;
+  border-bottom:3.1cqmin solid transparent;
+  border-left:4.6cqmin solid #7a2a00;
 }
 .ms-home-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
   justify-content:center;
-  gap:1.7cqmin;
-  margin-top:1.7cqmin;
+  gap:2.4cqmin;
+  margin-top:2.4cqmin;
 }
 .ms-screen-btn.ms-home-small-btn{
-  width:22cqmin;
+  width:33.8cqmin;
   min-width:0;
-  border:.42cqmin solid #5b8f39;
-  border-radius:2.2cqmin;
+  border:.6cqmin solid #5b8f39;
+  border-radius:3cqmin;
   color:#294817;
-  font-size:2.25cqmin;
+  font-size:3.4cqmin;
   line-height:1;
-  padding:1.15cqmin .8cqmin;
+  padding:1.85cqmin 1.1cqmin;
   white-space:nowrap;
-  box-shadow:0 .48cqmin 0 #4a6f25, 0 .85cqmin 1.2cqmin rgba(90,9,9,.2);
+  box-shadow:0 .7cqmin 0 #4a6f25, 0 1.1cqmin 1.5cqmin rgba(90,9,9,.2);
   background:
     radial-gradient(80% 120% at 28% 0%, rgba(255,255,255,.72), rgba(255,255,255,0) 30%),
     linear-gradient(180deg, #d9f7a4 0%, #9bdc4a 100%);
@@ -313,7 +315,7 @@ html, body {
 .ms-screen-btn.ms-home-small-btn:nth-child(2){
   border-color:#4f9db5;
   color:#143f52;
-  box-shadow:0 .48cqmin 0 #27758d, 0 .85cqmin 1.2cqmin rgba(90,9,9,.2);
+  box-shadow:0 .7cqmin 0 #27758d, 0 1.1cqmin 1.5cqmin rgba(90,9,9,.2);
   background:
     radial-gradient(80% 120% at 28% 0%, rgba(255,255,255,.72), rgba(255,255,255,0) 30%),
     linear-gradient(180deg, #bcefff 0%, #6fc7e6 100%);
@@ -659,12 +661,12 @@ html, body {
   font-size:40cqmin;
   line-height:1;
   /* pushed down so only the top "half body" peeks in */
-  transform:translateY(14%);
+  transform:translateY(22%);
   will-change:transform;
   transition:opacity .18s ease, transform .25s ease;
   animation:ms-bob 2.4s ease-in-out infinite;
 }
-.ms-cat-face img{ width:68cqmin; height:auto; transform:translateY(8%); }
+.ms-cat-face img{ width:68cqmin; height:auto; display:block; }
 .ms-cat-bubble{
   display:block;
   position:absolute;
@@ -687,18 +689,18 @@ html, body {
 .ms-cat.is-happy .ms-cat-face{ animation:ms-happy .5s ease; }
 .ms-cat.is-sad   .ms-cat-face{ animation:ms-shake .45s ease; }
 
-@keyframes ms-bob{ 0%,100%{transform:translateY(14%);} 50%{transform:translateY(9%);} }
+@keyframes ms-bob{ 0%,100%{transform:translateY(22%);} 50%{transform:translateY(17%);} }
 @keyframes ms-happy{
-  0%{transform:translateY(14%) scale(1);}
-  35%{transform:translateY(2%) scale(1.12);}
-  100%{transform:translateY(14%) scale(1);}
+  0%{transform:translateY(22%) scale(1);}
+  35%{transform:translateY(10%) scale(1.12);}
+  100%{transform:translateY(22%) scale(1);}
 }
 @keyframes ms-shake{
-  0%,100%{transform:translateY(14%) rotate(0);}
-  20%{transform:translateY(14%) rotate(-7deg);}
-  40%{transform:translateY(14%) rotate(7deg);}
-  60%{transform:translateY(14%) rotate(-5deg);}
-  80%{transform:translateY(14%) rotate(5deg);}
+  0%,100%{transform:translateY(22%) rotate(0);}
+  20%{transform:translateY(22%) rotate(-7deg);}
+  40%{transform:translateY(22%) rotate(7deg);}
+  60%{transform:translateY(22%) rotate(-5deg);}
+  80%{transform:translateY(22%) rotate(5deg);}
 }
 
 /* =====================================================================
@@ -1617,8 +1619,16 @@ html, body {
     }
   });
 
-  el.clear.addEventListener("click", clearPrep);
-  el.serve.addEventListener("click", serve);
+  el.clear.addEventListener(fastInputEvent, e => {
+    if (!isPrimaryInput(e)) return;
+    e.preventDefault();
+    clearPrep();
+  });
+  el.serve.addEventListener(fastInputEvent, e => {
+    if (!isPrimaryInput(e)) return;
+    e.preventDefault();
+    serve();
+  });
   el.play.addEventListener("click", () => {
     resetGameProgress();
     showLevelIntro();
