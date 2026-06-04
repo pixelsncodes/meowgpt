@@ -658,6 +658,7 @@ html, body {
   z-index:2;
 }
 .ms-cat-face{
+  position:relative;
   width:68cqmin;
   height:68cqmin;
   font-size:40cqmin;
@@ -668,7 +669,16 @@ html, body {
   transition:opacity .18s ease, transform .25s ease;
   animation:ms-bob 2.4s ease-in-out infinite;
 }
-.ms-cat-face img{ width:100%; height:100%; object-fit:contain; display:block; }
+.ms-cat-state{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  opacity:0;
+  transition:opacity .08s linear;
+}
+.ms-cat-state.is-active{ opacity:1; }
+.ms-cat-state img{ width:100%; height:100%; object-fit:contain; display:block; }
 .ms-cat-bubble{
   display:block;
   position:absolute;
@@ -1364,12 +1374,23 @@ html, body {
     });
   }
 
-  function setCat(stateName) {
-    const map = { neutral: "🐱", happy: "😸", sad: "😿" };
-    const catId = state.catId || CAT_IDS[0];
+  function renderCatStates(catId) {
+    if (el.catFace.dataset.catId === catId) return;
     const catAssets = ASSETS.cats[catId] || {};
-    const label = catId + " " + stateName + " cat";
-    el.catFace.innerHTML = visual(catAssets[stateName], map[stateName], label);
+    const fallback = { neutral: ":)", happy: ":3", sad: ":(" };
+    el.catFace.dataset.catId = catId;
+    el.catFace.innerHTML = ["neutral", "happy", "sad"].map(mood => {
+      const label = catId + " " + mood + " cat";
+      return `<span class="ms-cat-state" data-cat-state="${mood}">${visual(catAssets[mood], fallback[mood], label)}</span>`;
+    }).join("");
+  }
+
+  function setCat(stateName) {
+    const catId = state.catId || CAT_IDS[0];
+    renderCatStates(catId);
+    el.catFace.querySelectorAll("[data-cat-state]").forEach(layer => {
+      layer.classList.toggle("is-active", layer.dataset.catState === stateName);
+    });
     el.cat.classList.remove("is-happy", "is-sad");
     if (stateName === "happy") el.cat.classList.add("is-happy");
     if (stateName === "sad")   el.cat.classList.add("is-sad");
