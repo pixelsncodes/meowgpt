@@ -658,15 +658,17 @@ html, body {
   z-index:2;
 }
 .ms-cat-face{
+  width:68cqmin;
+  height:68cqmin;
   font-size:40cqmin;
   line-height:1;
-  /* pushed down so only the top "half body" peeks in */
-  transform:translateY(22%);
+  /* fixed crop offset avoids mobile percentage transform jumps */
+  transform:translateY(15cqmin);
   will-change:transform;
   transition:opacity .18s ease, transform .25s ease;
   animation:ms-bob 2.4s ease-in-out infinite;
 }
-.ms-cat-face img{ width:68cqmin; height:auto; display:block; }
+.ms-cat-face img{ width:100%; height:100%; object-fit:contain; display:block; }
 .ms-cat-bubble{
   display:block;
   position:absolute;
@@ -689,18 +691,18 @@ html, body {
 .ms-cat.is-happy .ms-cat-face{ animation:ms-happy .5s ease; }
 .ms-cat.is-sad   .ms-cat-face{ animation:ms-shake .45s ease; }
 
-@keyframes ms-bob{ 0%,100%{transform:translateY(22%);} 50%{transform:translateY(17%);} }
+@keyframes ms-bob{ 0%,100%{transform:translateY(15cqmin);} 50%{transform:translateY(16.2cqmin);} }
 @keyframes ms-happy{
-  0%{transform:translateY(22%) scale(1);}
-  35%{transform:translateY(10%) scale(1.12);}
-  100%{transform:translateY(22%) scale(1);}
+  0%{transform:translateY(15cqmin) scale(1);}
+  35%{transform:translateY(10cqmin) scale(1.08);}
+  100%{transform:translateY(15cqmin) scale(1);}
 }
 @keyframes ms-shake{
-  0%,100%{transform:translateY(22%) rotate(0);}
-  20%{transform:translateY(22%) rotate(-7deg);}
-  40%{transform:translateY(22%) rotate(7deg);}
-  60%{transform:translateY(22%) rotate(-5deg);}
-  80%{transform:translateY(22%) rotate(5deg);}
+  0%,100%{transform:translateY(15cqmin) rotate(0);}
+  20%{transform:translateY(15cqmin) rotate(-7deg);}
+  40%{transform:translateY(15cqmin) rotate(7deg);}
+  60%{transform:translateY(15cqmin) rotate(-5deg);}
+  80%{transform:translateY(15cqmin) rotate(5deg);}
 }
 
 /* =====================================================================
