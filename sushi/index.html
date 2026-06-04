@@ -161,7 +161,10 @@
       <div class="ms-tutorial-dim"></div>
       <div class="ms-tutorial-highlight" id="ms-tutorial-highlight"></div>
       <div class="ms-tutorial-pointer" id="ms-tutorial-pointer" aria-hidden="true"></div>
-      <div class="ms-tutorial-card" id="ms-tutorial-card"></div>
+      <div class="ms-tutorial-card">
+        <div id="ms-tutorial-copy"></div>
+        <button class="ms-tutorial-skip" id="ms-tutorial-skip" type="button">skip</button>
+      </div>
     </div>
   </div>
 </div>
@@ -999,13 +1002,13 @@ html, body {
   top:0;
   width:10cqmin;
   height:10cqmin;
-  border:.9cqmin solid #fff8a8;
+  box-sizing:border-box;
+  border:.55cqmin solid #fff8a8;
   border-radius:3cqmin;
   box-shadow:
     0 0 0 999px rgba(62,10,10,.44),
-    0 0 0 1.3cqmin rgba(255,255,255,.42),
-    0 0 3cqmin rgba(255,248,168,.88);
-  transform:translate3d(0,0,0);
+    0 0 0 .55cqmin rgba(255,255,255,.52),
+    0 0 2cqmin rgba(255,248,168,.82);
   animation:ms-tutorial-pulse 1.05s ease-in-out infinite;
 }
 .ms-tutorial-card{
@@ -1024,6 +1027,27 @@ html, body {
   line-height:1.05;
   text-align:center;
   box-shadow:0 1cqmin 2.4cqmin rgba(62,10,10,.34);
+}
+.ms-tutorial-skip{
+  position:absolute;
+  top:-2.6cqmin;
+  right:1.4cqmin;
+  height:5.4cqmin;
+  min-width:12cqmin;
+  border:.45cqmin solid var(--outline);
+  border-radius:2.7cqmin;
+  background:#ffd23f;
+  color:var(--ink);
+  font:900 2.5cqmin/1 "Fredoka", system-ui, sans-serif;
+  text-transform:lowercase;
+  box-shadow:0 .45cqmin 0 var(--outline);
+  cursor:pointer;
+  touch-action:manipulation;
+  pointer-events:auto;
+}
+.ms-tutorial-skip:active{
+  transform:translateY(.3cqmin);
+  box-shadow:0 .15cqmin 0 var(--outline);
 }
 .ms-tutorial-pointer{
   position:absolute;
@@ -1047,8 +1071,18 @@ html, body {
   position:relative;
 }
 @keyframes ms-tutorial-pulse{
-  0%,100%{ transform:translate3d(0,0,0) scale(1); }
-  50%{ transform:translate3d(0,0,0) scale(1.035); }
+  0%,100%{
+    box-shadow:
+      0 0 0 999px rgba(62,10,10,.44),
+      0 0 0 .55cqmin rgba(255,255,255,.52),
+      0 0 2cqmin rgba(255,248,168,.82);
+  }
+  50%{
+    box-shadow:
+      0 0 0 999px rgba(62,10,10,.44),
+      0 0 0 .85cqmin rgba(255,255,255,.68),
+      0 0 3cqmin rgba(255,248,168,1);
+  }
 }
 
 /* respect reduced-motion */
@@ -1474,7 +1508,8 @@ html, body {
     musicToggleIcon:document.getElementById("ms-music-toggle-icon"),
     trackTitle: document.getElementById("ms-track-title"),
     tutorial:   document.getElementById("ms-tutorial"),
-    tutorialCard:document.getElementById("ms-tutorial-card"),
+    tutorialCopy:document.getElementById("ms-tutorial-copy"),
+    tutorialSkip:document.getElementById("ms-tutorial-skip"),
     tutorialHighlight:document.getElementById("ms-tutorial-highlight"),
     tutorialPointer:document.getElementById("ms-tutorial-pointer")
   };
@@ -1574,23 +1609,34 @@ html, body {
     return "";
   }
 
+  function tutorialRadiusFor(step) {
+    if (step === "order") return "16px";
+    if (step === "prep") return "3.5cqmin";
+    if (step === "serve") return "3.5cqmin";
+    return "3.5cqmin";
+  }
+
   function positionTutorial() {
     if (!tutorial.active || !tutorial.target) return;
 
     const gameRect = el.game.getBoundingClientRect();
     const targetRect = tutorial.target.getBoundingClientRect();
-    const pad = Math.max(8, gameRect.width * 0.018);
-    const left = targetRect.left - gameRect.left - pad;
-    const top = targetRect.top - gameRect.top - pad;
-    const width = targetRect.width + pad * 2;
-    const height = targetRect.height + pad * 2;
+    const gameStyle = getComputedStyle(el.game);
+    const gameBorderLeft = parseFloat(gameStyle.borderLeftWidth) || 0;
+    const gameBorderTop = parseFloat(gameStyle.borderTopWidth) || 0;
+    const left = targetRect.left - gameRect.left - gameBorderLeft;
+    const top = targetRect.top - gameRect.top - gameBorderTop;
+    const width = targetRect.width;
+    const height = targetRect.height;
 
     el.tutorialHighlight.style.left = left + "px";
     el.tutorialHighlight.style.top = top + "px";
     el.tutorialHighlight.style.width = width + "px";
     el.tutorialHighlight.style.height = height + "px";
+    el.tutorialHighlight.style.borderRadius = tutorialRadiusFor(tutorial.step);
 
-    const cardRect = el.tutorialCard.getBoundingClientRect();
+    const card = el.tutorialCopy.parentElement;
+    const cardRect = card.getBoundingClientRect();
     const gap = Math.max(10, gameRect.width * 0.03);
     const cardWidth = cardRect.width || gameRect.width * 0.75;
     const cardHeight = cardRect.height || gameRect.height * 0.08;
@@ -1602,8 +1648,8 @@ html, body {
 
     const fitsAbove = top - gap - cardHeight > gameRect.height * 0.03;
     const cardTop = fitsAbove ? top - gap - cardHeight : top + height + gap;
-    el.tutorialCard.style.left = cardLeft + "px";
-    el.tutorialCard.style.top = cardTop + "px";
+    card.style.left = cardLeft + "px";
+    card.style.top = cardTop + "px";
 
     const pointerLeft = targetCenter - 1.8 * gameRect.width / 100;
     const pointerTop = fitsAbove ? cardTop + cardHeight - 1 : cardTop - 3 * gameRect.width / 100 + 1;
@@ -1618,8 +1664,9 @@ html, body {
     tutorial.target = tutorialTargetFor(step);
     if (!tutorial.target) return;
     tutorial.target.classList.add("ms-tutorial-target");
-    el.tutorialCard.textContent = tutorialCopyFor(step);
+    el.tutorialCopy.textContent = tutorialCopyFor(step);
     el.tutorial.classList.add("is-active");
+    positionTutorial();
     requestAnimationFrame(positionTutorial);
   }
 
@@ -2116,6 +2163,7 @@ html, body {
 
   el.recipe.addEventListener(fastInputEvent, e => {
     if (!isPrimaryInput(e)) return;
+    if (!tutorial.active) return;
     if (!isTutorialAllowedAction("view-order")) return;
     e.preventDefault();
     clearTimeout(tutorial.repositionTimer);
@@ -2154,6 +2202,12 @@ html, body {
     if (!isPrimaryInput(e)) return;
     e.preventDefault();
     toggleMusicPlayback();
+  });
+  el.tutorialSkip.addEventListener(fastInputEvent, e => {
+    if (!isPrimaryInput(e)) return;
+    if (!tutorial.active) return;
+    e.preventDefault();
+    completeTutorial();
   });
   el.play.addEventListener("click", () => {
     resetGameProgress();
