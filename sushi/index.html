@@ -1336,6 +1336,47 @@ html, body {
   ];
   const MUSIC_VOLUME = 0.45;
   const MUSIC_FADE_MS = 900;
+  const SFX_BASE_URL = "https://music.meowgpt.app/sfx";
+  const SFX_VOLUME = 0.75;
+  const SFX_FILES = {
+    orderSuccess: ["order-success.mp3"],
+    catHappy: [
+      "cat-happy-01.mp3",
+      "cat-happy-02.mp3",
+      "cat-happy-03.mp3"
+    ],
+    catSad: [
+      "cat-sad-01.mp3",
+      "cat-sad-02.mp3",
+      "cat-sad-03.mp3",
+      "cat-sad-04.mp3"
+    ],
+    orderWrong: ["order-wrong.mp3"],
+    stageComplete: [],
+    ingredientTap: ["ingredient-tap.mp3"],
+    ingredientRemove: ["ingredient-tap.mp3"],
+    serveTap: ["serve-tap.mp3"],
+    clearTap: ["clear-tap.mp3"],
+    buttonTap: ["button-tap.mp3"]
+  };
+  const SFX_VOLUME_BY_NAME = {
+    orderSuccess: 0.9,
+    catHappy: 0.85,
+    catSad: 0.85,
+    orderWrong: 0.9,
+    stageComplete: 1,
+    ingredientTap: 0.55,
+    ingredientRemove: 0.45,
+    serveTap: 0.65,
+    clearTap: 0.6,
+    buttonTap: 0.5
+  };
+  const SFX = Object.fromEntries(
+    Object.entries(SFX_FILES).map(([key, files]) => [
+      key,
+      files.map(file => `${SFX_BASE_URL}/${file}`)
+    ])
+  );
 
   const ASSETS = {
     cats: {            // by cat id, then state: neutral / happy / sad
@@ -1538,6 +1579,14 @@ html, body {
   const CAT_IDS = Object.keys(ASSETS.cats);
   let catQueue = [];
   let lastCatId = null;
+
+  function playSfx(name) {
+    const urls = SFX[name];
+    if (!urls || urls.length === 0) return;
+    const audio = new Audio(rand(urls));
+    audio.volume = Math.max(0, Math.min(1, SFX_VOLUME * (SFX_VOLUME_BY_NAME[name] ?? 1)));
+    audio.play().catch(() => {});
+  }
 
   function shuffled(items) {
     const copy = items.slice();
@@ -1963,6 +2012,8 @@ html, body {
      =================================================================== */
   function showBubble(type) {
     el.catBubble.textContent = rand(CAT_SOUNDS[type]);
+    if (type === "happy") playSfx("catHappy");
+    if (type === "sad") playSfx("catSad");
     el.catBubble.classList.remove("is-hiding");
     el.catBubble.classList.add("is-showing");
   }
@@ -2039,6 +2090,7 @@ html, body {
 
   function showLevelSummary() {
     state.locked = true;
+    playSfx("stageComplete");
     fadeOutMusic();
     setLevelBackground();
     el.summaryKicker.textContent = "level " + state.level + " complete";
@@ -2070,6 +2122,7 @@ html, body {
     if (!isTutorialAllowedAction("add", id)) return;
     if (state.prep.includes(id)) return;            // only once
     if (state.prep.length >= CONFIG.MAX_PREP_SLOTS) return;
+    playSfx("ingredientTap");
     state.prep.push(id);
     renderPrep();
     refreshGridState();
@@ -2079,6 +2132,7 @@ html, body {
   function removeIngredient(id) {
     if (state.locked) return;
     if (tutorial.active) return;
+    playSfx("ingredientRemove");
     state.prep = state.prep.filter(x => x !== id);
     renderPrep();
     refreshGridState();
@@ -2087,6 +2141,7 @@ html, body {
   function clearPrep() {
     if (state.locked) return;
     if (tutorial.active) return;
+    playSfx("clearTap");
     state.prep = [];
     renderPrep();
     refreshGridState();
@@ -2095,11 +2150,13 @@ html, body {
   function serve() {
     if (state.locked) return;
     if (!isTutorialAllowedAction("serve")) return;
+    playSfx("serveTap");
     if (tutorial.active) completeTutorial();
     state.locked = true;
 
     const correct = setsEqual(state.prep, state.order.ingredients);
     const gained  = correct ? CONFIG.POINTS_CORRECT : CONFIG.POINTS_WRONG;
+    playSfx(correct ? "orderSuccess" : "orderWrong");
 
     state.score += gained;
     state.ordersThisLevel++;
@@ -2240,25 +2297,47 @@ html, body {
   el.musicToggle.addEventListener(fastInputEvent, e => {
     if (!isPrimaryInput(e)) return;
     e.preventDefault();
+    playSfx("buttonTap");
     toggleMusicPlayback();
   });
   el.tutorialSkip.addEventListener(fastInputEvent, e => {
     if (!isPrimaryInput(e)) return;
     if (!tutorial.active) return;
     e.preventDefault();
+    playSfx("buttonTap");
     completeTutorial();
   });
   el.play.addEventListener("click", () => {
+    playSfx("buttonTap");
     resetGameProgress();
     showLevelIntro();
   });
-  el.howToPlay.addEventListener("click", () => screen("how"));
-  el.credits.addEventListener("click", () => screen("credits"));
-  el.howClose.addEventListener("click", () => screen("home"));
-  el.creditsClose.addEventListener("click", () => screen("home"));
-  el.levelStart.addEventListener("click", startLevel);
-  el.summaryNext.addEventListener("click", continueFromSummary);
+  el.howToPlay.addEventListener("click", () => {
+    playSfx("buttonTap");
+    screen("how");
+  });
+  el.credits.addEventListener("click", () => {
+    playSfx("buttonTap");
+    screen("credits");
+  });
+  el.howClose.addEventListener("click", () => {
+    playSfx("buttonTap");
+    screen("home");
+  });
+  el.creditsClose.addEventListener("click", () => {
+    playSfx("buttonTap");
+    screen("home");
+  });
+  el.levelStart.addEventListener("click", () => {
+    playSfx("buttonTap");
+    startLevel();
+  });
+  el.summaryNext.addEventListener("click", () => {
+    playSfx("buttonTap");
+    continueFromSummary();
+  });
   el.replay.addEventListener("click", () => {
+    playSfx("buttonTap");
     stopMusic();
     resetGameProgress();
     screen("home");
