@@ -1819,6 +1819,21 @@ html, body {
     updateMusicControls();
   }
 
+  function fadeOutMusic() {
+    if (bgm.paused) {
+      bgm.volume = MUSIC_VOLUME;
+      updateMusicControls();
+      return;
+    }
+
+    fadeMusicTo(0, MUSIC_FADE_MS, () => {
+      bgm.pause();
+      bgm.currentTime = 0;
+      bgm.volume = MUSIC_VOLUME;
+      updateMusicControls();
+    });
+  }
+
   function updateMusicControls() {
     const shouldShowPlay = musicPaused || bgm.paused;
 
@@ -2024,6 +2039,7 @@ html, body {
 
   function showLevelSummary() {
     state.locked = true;
+    fadeOutMusic();
     setLevelBackground();
     el.summaryKicker.textContent = "level " + state.level + " complete";
     el.summaryTitle.textContent = currentLevel().name;
