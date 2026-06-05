@@ -1357,7 +1357,7 @@ html, body {
     ingredientRemove: ["ingredient-tap2.mp3"],
     serveTap: ["serve-tap.mp3"],
     clearTap: ["clear-tap2.mp3"],
-    buttonTap: ["button-tap3.mp3"]
+    buttonTap: ["button-tap4.mp3"]
   };
   const SFX_VOLUME_BY_NAME = {
     orderSuccess: 0.5,
@@ -2257,6 +2257,14 @@ html, body {
     return e.type === "click" || e.isPrimary !== false;
   }
 
+  function onFastTap(target, handler) {
+    target.addEventListener(fastInputEvent, e => {
+      if (!isPrimaryInput(e)) return;
+      e.preventDefault();
+      handler(e);
+    });
+  }
+
   el.recipe.addEventListener(fastInputEvent, e => {
     if (!isPrimaryInput(e)) return;
     if (!tutorial.active) return;
@@ -2307,36 +2315,36 @@ html, body {
     playSfx("buttonTap");
     completeTutorial();
   });
-  el.play.addEventListener("click", () => {
+  onFastTap(el.play, () => {
     playSfx("buttonTap");
     resetGameProgress();
     showLevelIntro();
   });
-  el.howToPlay.addEventListener("click", () => {
+  onFastTap(el.howToPlay, () => {
     playSfx("buttonTap");
     screen("how");
   });
-  el.credits.addEventListener("click", () => {
+  onFastTap(el.credits, () => {
     playSfx("buttonTap");
     screen("credits");
   });
-  el.howClose.addEventListener("click", () => {
+  onFastTap(el.howClose, () => {
     playSfx("buttonTap");
     screen("home");
   });
-  el.creditsClose.addEventListener("click", () => {
+  onFastTap(el.creditsClose, () => {
     playSfx("buttonTap");
     screen("home");
   });
-  el.levelStart.addEventListener("click", () => {
+  onFastTap(el.levelStart, () => {
     playSfx("buttonTap");
     startLevel();
   });
-  el.summaryNext.addEventListener("click", () => {
+  onFastTap(el.summaryNext, () => {
     playSfx("buttonTap");
     continueFromSummary();
   });
-  el.replay.addEventListener("click", () => {
+  onFastTap(el.replay, () => {
     playSfx("buttonTap");
     stopMusic();
     resetGameProgress();
