@@ -2305,7 +2305,6 @@ html, body {
   el.musicToggle.addEventListener(fastInputEvent, e => {
     if (!isPrimaryInput(e)) return;
     e.preventDefault();
-    playSfx("buttonTap");
     toggleMusicPlayback();
   });
   el.tutorialSkip.addEventListener(fastInputEvent, e => {
@@ -2329,11 +2328,9 @@ html, body {
     screen("credits");
   });
   onFastTap(el.howClose, () => {
-    playSfx("buttonTap");
     screen("home");
   });
   onFastTap(el.creditsClose, () => {
-    playSfx("buttonTap");
     screen("home");
   });
   onFastTap(el.levelStart, () => {
